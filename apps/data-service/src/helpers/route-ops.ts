@@ -15,7 +15,6 @@ import {
 	ZodParseError,
 } from "./errors";
 
-// const getLinkInfoFromKv = (env: Env, id: string) =>
 const getLinkInfoFromKv = (id: string) =>
 	Effect.gen(function* () {
 		const c = yield* CloudFlareContext;
@@ -41,17 +40,6 @@ const getLinkInfoFromKv = (id: string) =>
 		return LinkInfoFromKv;
 	});
 
-// async function getLinkInfoFromKv(env: Env, id: string) {
-// 	const linkInfo = await env.CACHE.get(id);
-// 	if (!linkInfo) return null;
-// 	try {
-// 		const parsedLinkInfo = JSON.parse(linkInfo);
-// 		return linkSchema.parse(parsedLinkInfo);
-// 	} catch (error) {
-// 		return null;
-// 	}
-// }
-
 const TTL_TIME = 60 * 60 * 24; // 1 day
 
 const saveLinkInfoToKv = (env: Env, id: string, linkInfo: LinkSchemaType) =>
@@ -62,20 +50,6 @@ const saveLinkInfoToKv = (env: Env, id: string, linkInfo: LinkSchemaType) =>
 			}),
 		catch: (error) => new SaveLinktoKVError({ cause: error }),
 	});
-
-// async function saveLinkInfoToKv(
-// 	env: Env,
-// 	id: string,
-// 	linkInfo: LinkSchemaType,
-// ) {
-// 	try {
-// 		await env.CACHE.put(id, JSON.stringify(linkInfo), {
-// 			expirationTtl: TTL_TIME,
-// 		});
-// 	} catch (error) {
-// 		console.error("Error saving link info to KV:", error);
-// 	}
-// }
 
 export const getRoutingDestinations = (id: string) =>
 	Effect.gen(function* () {
