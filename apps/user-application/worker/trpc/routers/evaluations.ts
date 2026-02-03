@@ -1,31 +1,40 @@
-import { t } from "@/worker/trpc/trpc-instance";
+import {
+	getEvaluations,
+	getNotAvailableEvaluations,
+} from "@repo/data-ops/queries/evaluations";
 
 import { z } from "zod";
-import { EVALUATION_ISSUES, EVALUATIONS } from "./dummy-data";
+import { t } from "@/worker/trpc/trpc-instance";
 
 export const evaluationsTrpcRoutes = t.router({
-  problematicDestinations: t.procedure.query(async ({}) => {
-    return EVALUATION_ISSUES;
-  }),
-  recentEvaluations: t.procedure
-    .input(
-      z
-        .object({
-          createdBefore: z.string().optional(),
-        })
-        .optional(),
-    )
-    .query(async ({}) => {
-      const evaluations = EVALUATIONS;
+	problematicDestinations: t.procedure.query(async ({ ctx }) => {
+		return await getNotAvailableEvaluations(
+			"string",
+			// ctx.userInfo.userId
+		);
+	}),
+	recentEvaluations: t.procedure
+		.input(
+			z
+				.object({
+					createdBefore: z.string().optional(),
+				})
+				.optional(),
+		)
+		.query(async ({ ctx }) => {
+			const evaluations = await getEvaluations(
+				"string",
+				// ctx.userInfo.userId
+			);
 
-      const oldestCreatedAt =
-        evaluations.length > 0
-          ? evaluations[evaluations.length - 1].createdAt
-          : null;
+			const oldestCreatedAt =
+				evaluations.length > 0
+					? evaluations[evaluations.length - 1].createdAt
+					: null;
 
-      return {
-        data: evaluations,
-        oldestCreatedAt,
-      };
-    }),
+			return {
+				data: evaluations,
+				oldestCreatedAt,
+			};
+		}),
 });

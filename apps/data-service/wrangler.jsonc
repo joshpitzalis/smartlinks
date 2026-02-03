@@ -11,6 +11,12 @@
 	"observability": {
 		"enabled": true
 	},
+	"browser": {
+		"binding": "VIRTUAL_BROWSER"
+	},
+	"ai": {
+		"binding": "AI"
+	},
 	"d1_databases": [
 		{
 			"binding": "DB",
@@ -18,11 +24,24 @@
 			"remote": true
 		}
 	],
+	"r2_buckets": [
+		{
+			"binding": "BUCKET",
+			"bucket_name": "smartlinks-eval-staging"
+		}
+	],
 	"kv_namespaces": [
 		{
 			"binding": "CACHE",
 			"id": "dd1cfaabfc8c413faf01cb0ea8a69201",
 			"remote": true
+		}
+	],
+	"workflows": [
+		{
+			"binding": "DESTINATION_EVALUATION_WORKFLOW",
+			"name": "destination-evaluation-workflow",
+			"class_name": "DestinationEvaluationWorkflow"
 		}
 	],
 	"queues": {
