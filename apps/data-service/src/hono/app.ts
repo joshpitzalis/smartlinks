@@ -46,6 +46,17 @@ App.get("/:id", async (c: Context<{ Bindings: Env }>) => {
 	);
 });
 
+// App.get("/do/:name", async (c) => {
+// 	const name = c.req.param("name");
+// 	const doId = c.env.EVALUATION_SCHEDULAR.idFromName(name);
+// 	const stub = c.env.EVALUATION_SCHEDULAR.get(doId);
+// 	await stub.increment();
+// 	const count = await stub.getCount();
+// 	return c.json({
+// 		count,
+// 	});
+// });
+
 const program = Effect.gen(function* () {
 	const c = yield* CloudFlareContext;
 	const id = c.req.param("id");

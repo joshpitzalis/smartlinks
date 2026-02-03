@@ -57,5 +57,19 @@
 				"queue": "smartlinks-data-queue-staging"
 			}
 		]
-	}
+	},
+	"durable_objects": {
+		"bindings": [
+			{
+				"name": "EVALUATION_SCHEDULER",
+				"class_name": "EvaluationScheduler"
+			}
+		]
+	},
+	"migrations": [
+		{
+			"tag": "v1",
+			"new_classes": ["EvaluationScheduler"]
+		}
+	]
 }

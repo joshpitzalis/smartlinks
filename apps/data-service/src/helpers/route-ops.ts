@@ -3,6 +3,7 @@ import {
 	type LinkSchemaType,
 	linkSchema,
 } from "@repo/data-ops/zod-schema/links";
+import type { LinkClickMessageType } from "@repo/data-ops/zod-schema/queue";
 import { Effect } from "effect";
 import { CloudFlareContext } from "@/services";
 import {
@@ -89,4 +90,20 @@ export function getDestinationForCountry(
 
 	// Fallback to default
 	return linkInfo.destinations.default;
+}
+
+export async function scheduleEvalWorkflow(
+	env: Env,
+	event: LinkClickMessageType,
+) {
+	const doId = env.EVALUATION_SCHEDULER.idFromName(
+		`${event.data.id}:${event.data.destination}`,
+	);
+	const stub = env.EVALUATION_SCHEDULER.get(doId);
+	await stub.collectLinkClick(
+		event.data.accountId,
+		event.data.id,
+		event.data.destination,
+		event.data.country || "UNKNOWN",
+	);
 }
