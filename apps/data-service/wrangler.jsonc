@@ -24,5 +24,19 @@
 			"id": "dd1cfaabfc8c413faf01cb0ea8a69201",
 			"remote": true
 		}
-	]
+	],
+	"queues": {
+		"consumers": [
+			{
+				"queue": "smartlinks-data-queue-staging",
+				"dead_letter_queue": "smartlinks-dead-letter-staging"
+			}
+		],
+		"producers": [
+			{
+				"binding": "QUEUE",
+				"queue": "smartlinks-data-queue-staging"
+			}
+		]
+	}
 }

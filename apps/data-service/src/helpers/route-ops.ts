@@ -54,8 +54,10 @@ const saveLinkInfoToKv = (env: Env, id: string, linkInfo: LinkSchemaType) =>
 export const getRoutingDestinations = (id: string) =>
 	Effect.gen(function* () {
 		const c = yield* CloudFlareContext;
-		// const linkInfo = yield* getLinkInfoFromKv(env, id);
-		const linkInfo = yield* getLinkInfoFromKv(id);
+		const linkInfo = yield* getLinkInfoFromKv(id).pipe(
+			Effect.catchTag("KvNotFoundError", () => Effect.succeed(null)),
+		);
+
 		if (linkInfo) return linkInfo;
 
 		const linkInfoFromDb = yield* Effect.tryPromise({

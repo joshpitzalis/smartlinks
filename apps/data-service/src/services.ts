@@ -1,14 +1,7 @@
-import { Context } from "effect";
+import { Context as EffectContext } from "effect";
+import type { Context } from "hono";
 
-export class CloudFlareContext extends Context.Tag("CloudFlareContext")<
+export class CloudFlareContext extends EffectContext.Tag("CloudFlareContext")<
 	CloudFlareContext,
-	{
-		req: {
-			param: (key: string) => string;
-			raw: { cf: unknown };
-		};
-		env: Env;
-		text: (body: string, status: number) => Response;
-		redirect: (url: string) => Response;
-	}
+	Context<{ Bindings: Env }>
 >() {}

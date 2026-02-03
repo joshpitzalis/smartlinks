@@ -1,27 +1,26 @@
 import { cloudflareInfoSchema } from "@repo/data-ops/zod-schema/links";
-import { Data, Effect, Layer } from "effect";
-import { Hono } from "hono";
+import type { LinkClickMessageType } from "@repo/data-ops/zod-schema/queue";
+import { Data, Effect } from "effect";
+import { type Context, Hono } from "hono";
 import {
 	getDestinationForCountry,
 	getRoutingDestinations,
 } from "@/helpers/route-ops";
 import { CloudFlareContext } from "@/services";
 
-class NoLinkInfo extends Data.TaggedError("NoLinkInfo") {}
 class InvalidCloudflareHeaders extends Data.TaggedError(
 	"InvalidCloudflareHeaders",
 ) {}
 
 export const App = new Hono<{ Bindings: Env }>();
 
-App.get("/:id", async (c) => {
+App.get("/:id", async (c: Context<{ Bindings: Env }>) => {
 	return Effect.runPromise(
 		program.pipe(
-			Effect.provide(Layer.succeed(CloudFlareContext, c)),
+			Effect.provideService(CloudFlareContext, c),
 			Effect.match({
 				onFailure: (error) => {
 					switch (error._tag) {
-						case "KvNotFoundError":
 						case "KvFetchError":
 						case "JsonParseError":
 						case "ZodParseError":
@@ -29,10 +28,11 @@ App.get("/:id", async (c) => {
 						case "FetchLinkFromDBError":
 						case "SaveLinktoKVError":
 							return c.text(`Routing destination error: ${error._tag}`, 500);
-						case "NoLinkInfo":
-							return c.text("Destination not found", 404);
+						// case "NoLinkInfo":
+						// 	return c.text("Destination not found", 404);
 						case "InvalidCloudflareHeaders":
 							return c.text("Invalid Cloudflare headers", 400);
+
 						default: {
 							// This will error if you don't handle all cases
 							const _exhaustive: never = error;
@@ -52,9 +52,9 @@ const program = Effect.gen(function* () {
 
 	const linkInfo = yield* getRoutingDestinations(id);
 
-	if (!linkInfo) {
-		return yield* new NoLinkInfo();
-	}
+	// if (!linkInfo) {
+	// 	return yield* new NoLinkInfo();
+	// }
 
 	const cfHeader = cloudflareInfoSchema.safeParse(c.req.raw.cf);
 	if (!cfHeader.success) {
@@ -64,5 +64,40 @@ const program = Effect.gen(function* () {
 	const headers = cfHeader.data;
 	const destination = getDestinationForCountry(linkInfo, headers.country);
 
+	if (destination) {
+		const queueMessage: LinkClickMessageType = {
+			type: "LINK_CLICK",
+			data: {
+				id: id,
+				country: headers.country,
+				destination: destination,
+				accountId: linkInfo.accountId,
+				latitude: headers.latitude,
+				longitude: headers.longitude,
+				timestamp: new Date().toISOString(),
+			},
+		};
+
+		yield* sendMessageToQueue(c, queueMessage).pipe(
+			Effect.catchTag("QueueError", () => Effect.succeed(null)),
+		);
+	}
+
 	return destination;
 });
+
+class QueueError extends Data.TaggedError("QueueError")<{
+	cause: unknown;
+}> {}
+
+const sendMessageToQueue = (
+	c: Context<{ Bindings: Env }>,
+	queueMessage: LinkClickMessageType,
+) => {
+	const sendPromise = c.env.QUEUE.send(queueMessage);
+	c.executionCtx.waitUntil(sendPromise);
+	return Effect.tryPromise({
+		try: () => sendPromise,
+		catch: (cause) => new QueueError({ cause }),
+	});
+};
