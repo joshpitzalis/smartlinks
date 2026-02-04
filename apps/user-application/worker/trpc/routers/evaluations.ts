@@ -1,11 +1,17 @@
-import { t } from "@/worker/trpc/trpc-instance";
+import {
+  getEvaluations,
+  getNotAvailableEvaluations,
+} from "@repo/data-ops/queries/evaluations";
 
 import { z } from "zod";
-import { EVALUATION_ISSUES, EVALUATIONS } from "./dummy-data";
+import { t } from "@/worker/trpc/trpc-instance";
 
 export const evaluationsTrpcRoutes = t.router({
-  problematicDestinations: t.procedure.query(async ({}) => {
-    return EVALUATION_ISSUES;
+  problematicDestinations: t.procedure.query(async () => {
+    return await getNotAvailableEvaluations(
+      "string"
+      // ctx.userInfo.userId
+    );
   }),
   recentEvaluations: t.procedure
     .input(
@@ -13,10 +19,13 @@ export const evaluationsTrpcRoutes = t.router({
         .object({
           createdBefore: z.string().optional(),
         })
-        .optional(),
+        .optional()
     )
-    .query(async ({}) => {
-      const evaluations = EVALUATIONS;
+    .query(async () => {
+      const evaluations = await getEvaluations(
+        "string"
+        // ctx.userInfo.userId
+      );
 
       const oldestCreatedAt =
         evaluations.length > 0

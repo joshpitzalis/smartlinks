@@ -3,7 +3,9 @@ import {
 	type LinkSchemaType,
 	linkSchema,
 } from "@repo/data-ops/zod-schema/links";
+import type { LinkClickMessageType } from "@repo/data-ops/zod-schema/queue";
 import { Effect } from "effect";
+import moment from "moment";
 import { CloudFlareContext } from "@/services";
 import {
 	FetchLinkFromDBError,
@@ -54,8 +56,10 @@ const saveLinkInfoToKv = (env: Env, id: string, linkInfo: LinkSchemaType) =>
 export const getRoutingDestinations = (id: string) =>
 	Effect.gen(function* () {
 		const c = yield* CloudFlareContext;
-		// const linkInfo = yield* getLinkInfoFromKv(env, id);
-		const linkInfo = yield* getLinkInfoFromKv(id);
+		const linkInfo = yield* getLinkInfoFromKv(id).pipe(
+			Effect.catchTag("KvNotFoundError", () => Effect.succeed(null)),
+		);
+
 		if (linkInfo) return linkInfo;
 
 		const linkInfoFromDb = yield* Effect.tryPromise({
@@ -87,4 +91,37 @@ export function getDestinationForCountry(
 
 	// Fallback to default
 	return linkInfo.destinations.default;
+}
+
+export async function scheduleEvalWorkflow(
+	env: Env,
+	event: LinkClickMessageType,
+) {
+	const doId = env.EVALUATION_SCHEDULER.idFromName(
+		`${event.data.id}:${event.data.destination}`,
+	);
+	const stub = env.EVALUATION_SCHEDULER.get(doId);
+	await stub.collectLinkClick(
+		event.data.accountId,
+		event.data.id,
+		event.data.destination,
+		event.data.country || "UNKNOWN",
+	);
+}
+
+export async function captureLinkClickInBackground(
+	env: Env,
+	event: LinkClickMessageType,
+) {
+	await env.QUEUE.send(event);
+	const doId = env.LINK_CLICK_TRACKER_OBJECT.idFromName(event.data.accountId);
+	const stub = env.LINK_CLICK_TRACKER_OBJECT.get(doId);
+	if (!event.data.latitude || !event.data.longitude || !event.data.country)
+		return;
+	await stub.addClick(
+		event.data.latitude,
+		event.data.longitude,
+		event.data.country,
+		moment().valueOf(),
+	);
 }
