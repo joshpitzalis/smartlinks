@@ -3,6 +3,7 @@ import type { LinkClickMessageType } from "@repo/data-ops/zod-schema/queue";
 import { Data, Effect } from "effect";
 import { type Context, Hono } from "hono";
 import {
+	captureLinkClickInBackground,
 	getDestinationForCountry,
 	getRoutingDestinations,
 } from "@/helpers/route-ops";
@@ -14,6 +15,19 @@ class InvalidCloudflareHeaders extends Data.TaggedError(
 
 export const App = new Hono<{ Bindings: Env }>();
 
+App.get("/click-socket", async (c) => {
+	const upgradeHeader = c.req.header("Upgrade");
+	if (!upgradeHeader || upgradeHeader !== "websocket") {
+		return c.text("Expected Upgrade: websocket", 426);
+	}
+
+	const accountId = c.req.header("account-id");
+	// const accountId = "1234567890";
+	if (!accountId) return c.text("No Headers", 404);
+	const doId = c.env.LINK_CLICK_TRACKER_OBJECT.idFromName(accountId);
+	const stub = c.env.LINK_CLICK_TRACKER_OBJECT.get(doId);
+	return await stub.fetch(c.req.raw);
+});
 App.get("/:id", async (c: Context<{ Bindings: Env }>) => {
 	return Effect.runPromise(
 		program.pipe(
@@ -45,17 +59,6 @@ App.get("/:id", async (c: Context<{ Bindings: Env }>) => {
 		),
 	);
 });
-
-// App.get("/do/:name", async (c) => {
-// 	const name = c.req.param("name");
-// 	const doId = c.env.EVALUATION_SCHEDULAR.idFromName(name);
-// 	const stub = c.env.EVALUATION_SCHEDULAR.get(doId);
-// 	await stub.increment();
-// 	const count = await stub.getCount();
-// 	return c.json({
-// 		count,
-// 	});
-// });
 
 const program = Effect.gen(function* () {
 	const c = yield* CloudFlareContext;
@@ -105,7 +108,8 @@ const sendMessageToQueue = (
 	c: Context<{ Bindings: Env }>,
 	queueMessage: LinkClickMessageType,
 ) => {
-	const sendPromise = c.env.QUEUE.send(queueMessage);
+	// const sendPromise = c.env.QUEUE.send(queueMessage);
+	const sendPromise = captureLinkClickInBackground(c.env, queueMessage);
 	c.executionCtx.waitUntil(sendPromise);
 	return Effect.tryPromise({
 		try: () => sendPromise,

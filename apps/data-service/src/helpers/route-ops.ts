@@ -5,6 +5,7 @@ import {
 } from "@repo/data-ops/zod-schema/links";
 import type { LinkClickMessageType } from "@repo/data-ops/zod-schema/queue";
 import { Effect } from "effect";
+import moment from "moment";
 import { CloudFlareContext } from "@/services";
 import {
 	FetchLinkFromDBError,
@@ -105,5 +106,22 @@ export async function scheduleEvalWorkflow(
 		event.data.id,
 		event.data.destination,
 		event.data.country || "UNKNOWN",
+	);
+}
+
+export async function captureLinkClickInBackground(
+	env: Env,
+	event: LinkClickMessageType,
+) {
+	await env.QUEUE.send(event);
+	const doId = env.LINK_CLICK_TRACKER_OBJECT.idFromName(event.data.accountId);
+	const stub = env.LINK_CLICK_TRACKER_OBJECT.get(doId);
+	if (!event.data.latitude || !event.data.longitude || !event.data.country)
+		return;
+	await stub.addClick(
+		event.data.latitude,
+		event.data.longitude,
+		event.data.country,
+		moment().valueOf(),
 	);
 }
