@@ -7,6 +7,7 @@
 	"name": "user-application",
 	"main": "worker/index.ts",
 	"compatibility_date": "2025-06-17",
+	"compatibility_flags": ["nodejs_compat"],
 	"assets": {
 		"binding": "ASSETS",
 		"not_found_handling": "single-page-application",
@@ -17,6 +18,11 @@
 	},
 	"env": {
 		"staging": {
+			"vars": {
+				"STRIPE_PRODUCT_BASIC": "price_1Sxo2KDm7JcXGdfMb33gWVND",
+				"STRIPE_PRODUCT_PRO": "price_1Sxo3HDm7JcXGdfMLmG8V9mm",
+				"STRIPE_PRODUCT_ENTERPRISE": "price_1Sxo46Dm7JcXGdfMoWgvspAe"
+			},
 			"d1_databases": [
 				{
 					"binding": "DB",

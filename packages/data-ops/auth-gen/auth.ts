@@ -8,4 +8,5 @@ export const auth: ReturnType<typeof createBetterAuth> = createBetterAuth(
 			provider: "sqlite",
 		},
 	),
+	"",
 );
