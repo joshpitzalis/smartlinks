@@ -84,6 +84,12 @@
 			]
 		},
 		"production": {
+			"routes": [
+				{
+					"custom_domain": true,
+					"pattern": "app.ifnot.work"
+				}
+			],
 			"browser": {
 				"binding": "VIRTUAL_BROWSER"
 			},
