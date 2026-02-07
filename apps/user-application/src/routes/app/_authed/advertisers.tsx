@@ -8,7 +8,7 @@ export const Route = createFileRoute("/app/_authed/advertisers")({
 function RouteComponent() {
 	return (
 		<div className="p-6">
-			<Gantt />
+			<Gantt page_id="434609730060978" />
 		</div>
 	);
 }
