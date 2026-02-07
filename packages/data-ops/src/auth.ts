@@ -4,84 +4,85 @@ import { drizzleAdapter } from "better-auth/adapters/drizzle";
 import Stripe from "stripe";
 import { getDb } from "./db/database";
 import {
-	account,
-	session,
-	subscription,
-	user,
-	verification,
+  account,
+  session,
+  subscription,
+  user,
+  verification,
 } from "./drizzle-out/auth-schema";
 
 let auth: ReturnType<typeof betterAuth>;
 
 type StripeConfig = {
-	stripeWebhookSecret: string;
-	plans: any[];
-	stripeApiKey?: string;
+  stripeWebhookSecret: string;
+  plans: any[];
+  stripeApiKey?: string;
 };
 
 export function createBetterAuth(
-	database: NonNullable<Parameters<typeof betterAuth>[0]>["database"],
-	secret: string,
-	stripeConfig?: StripeConfig,
-	google?: { clientId: string; clientSecret: string },
+  database: NonNullable<Parameters<typeof betterAuth>[0]>["database"],
+  secret: string,
+  stripeConfig?: StripeConfig,
+  google?: { clientId: string; clientSecret: string },
 ): ReturnType<typeof betterAuth> {
-	return betterAuth({
-		database,
-		secret,
-		emailAndPassword: {
-			enabled: false,
-		},
-		socialProviders: {
-			google: {
-				clientId: google?.clientId ?? "",
-				clientSecret: google?.clientSecret ?? "",
-			},
-		},
-		plugins: [
-			stripe({
-				stripeClient: new Stripe(
-					stripeConfig?.stripeApiKey || process.env.STRIPE_KEY!,
-					{
-						apiVersion: "2025-08-27.basil",
-					},
-				),
-				stripeWebhookSecret:
-					stripeConfig?.stripeWebhookSecret ??
-					process.env.STRIPE_WEBHOOK_SECRET!,
-				createCustomerOnSignUp: true,
-				subscription: {
-					enabled: true,
-					plans: stripeConfig?.plans ?? [],
-				},
-			}),
-		],
-	});
+  return betterAuth({
+    database,
+    secret,
+    emailAndPassword: {
+      enabled: false,
+    },
+    socialProviders: {
+      google: {
+        clientId: google?.clientId ?? "",
+        clientSecret: google?.clientSecret ?? "",
+      },
+    },
+    plugins: [
+      stripe({
+        stripeClient: new Stripe(
+          stripeConfig?.stripeApiKey || process.env.STRIPE_KEY!,
+          {
+            // apiVersion: "2025-08-27.basil",
+            apiVersion: "2025-03-31.basil",
+          },
+        ),
+        stripeWebhookSecret:
+          stripeConfig?.stripeWebhookSecret ??
+          process.env.STRIPE_WEBHOOK_SECRET!,
+        createCustomerOnSignUp: true,
+        subscription: {
+          enabled: true,
+          plans: stripeConfig?.plans ?? [],
+        },
+      }),
+    ],
+  });
 }
 
 export function getAuth(
-	google: {
-		clientId: string;
-		clientSecret: string;
-	},
-	stripe: StripeConfig,
-	secret: string,
+  google: {
+    clientId: string;
+    clientSecret: string;
+  },
+  stripe: StripeConfig,
+  secret: string,
 ): ReturnType<typeof betterAuth> {
-	if (auth) return auth;
+  if (auth) return auth;
 
-	auth = createBetterAuth(
-		drizzleAdapter(getDb(), {
-			provider: "sqlite",
-			schema: {
-				user,
-				session,
-				account,
-				verification,
-				subscription,
-			},
-		}),
-		secret,
-		stripe,
-		google,
-	);
-	return auth;
+  auth = createBetterAuth(
+    drizzleAdapter(getDb(), {
+      provider: "sqlite",
+      schema: {
+        user,
+        session,
+        account,
+        verification,
+        subscription,
+      },
+    }),
+    secret,
+    stripe,
+    google,
+  );
+  return auth;
 }

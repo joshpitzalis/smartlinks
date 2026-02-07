@@ -16,6 +16,7 @@ import { Route as AppAuthedUpgradeRouteImport } from './routes/app/_authed/upgra
 import { Route as AppAuthedLinksRouteImport } from './routes/app/_authed/links'
 import { Route as AppAuthedEvaluationsRouteImport } from './routes/app/_authed/evaluations'
 import { Route as AppAuthedCreateRouteImport } from './routes/app/_authed/create'
+import { Route as AppAuthedAdvertisersRouteImport } from './routes/app/_authed/advertisers'
 import { Route as AppAuthedLinkIdRouteImport } from './routes/app/_authed/link.$id'
 
 const IndexRoute = IndexRouteImport.update({
@@ -53,6 +54,11 @@ const AppAuthedCreateRoute = AppAuthedCreateRouteImport.update({
   path: '/create',
   getParentRoute: () => AppAuthedRoute,
 } as any)
+const AppAuthedAdvertisersRoute = AppAuthedAdvertisersRouteImport.update({
+  id: '/advertisers',
+  path: '/advertisers',
+  getParentRoute: () => AppAuthedRoute,
+} as any)
 const AppAuthedLinkIdRoute = AppAuthedLinkIdRouteImport.update({
   id: '/link/$id',
   path: '/link/$id',
@@ -62,6 +68,7 @@ const AppAuthedLinkIdRoute = AppAuthedLinkIdRouteImport.update({
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/app': typeof AppAuthedRouteWithChildren
+  '/app/advertisers': typeof AppAuthedAdvertisersRoute
   '/app/create': typeof AppAuthedCreateRoute
   '/app/evaluations': typeof AppAuthedEvaluationsRoute
   '/app/links': typeof AppAuthedLinksRoute
@@ -71,6 +78,7 @@ export interface FileRoutesByFullPath {
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/app/advertisers': typeof AppAuthedAdvertisersRoute
   '/app/create': typeof AppAuthedCreateRoute
   '/app/evaluations': typeof AppAuthedEvaluationsRoute
   '/app/links': typeof AppAuthedLinksRoute
@@ -82,6 +90,7 @@ export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/app/_authed': typeof AppAuthedRouteWithChildren
+  '/app/_authed/advertisers': typeof AppAuthedAdvertisersRoute
   '/app/_authed/create': typeof AppAuthedCreateRoute
   '/app/_authed/evaluations': typeof AppAuthedEvaluationsRoute
   '/app/_authed/links': typeof AppAuthedLinksRoute
@@ -94,6 +103,7 @@ export interface FileRouteTypes {
   fullPaths:
     | '/'
     | '/app'
+    | '/app/advertisers'
     | '/app/create'
     | '/app/evaluations'
     | '/app/links'
@@ -103,6 +113,7 @@ export interface FileRouteTypes {
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
+    | '/app/advertisers'
     | '/app/create'
     | '/app/evaluations'
     | '/app/links'
@@ -113,6 +124,7 @@ export interface FileRouteTypes {
     | '__root__'
     | '/'
     | '/app/_authed'
+    | '/app/_authed/advertisers'
     | '/app/_authed/create'
     | '/app/_authed/evaluations'
     | '/app/_authed/links'
@@ -177,6 +189,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AppAuthedCreateRouteImport
       parentRoute: typeof AppAuthedRoute
     }
+    '/app/_authed/advertisers': {
+      id: '/app/_authed/advertisers'
+      path: '/advertisers'
+      fullPath: '/app/advertisers'
+      preLoaderRoute: typeof AppAuthedAdvertisersRouteImport
+      parentRoute: typeof AppAuthedRoute
+    }
     '/app/_authed/link/$id': {
       id: '/app/_authed/link/$id'
       path: '/link/$id'
@@ -188,6 +207,7 @@ declare module '@tanstack/react-router' {
 }
 
 interface AppAuthedRouteChildren {
+  AppAuthedAdvertisersRoute: typeof AppAuthedAdvertisersRoute
   AppAuthedCreateRoute: typeof AppAuthedCreateRoute
   AppAuthedEvaluationsRoute: typeof AppAuthedEvaluationsRoute
   AppAuthedLinksRoute: typeof AppAuthedLinksRoute
@@ -197,6 +217,7 @@ interface AppAuthedRouteChildren {
 }
 
 const AppAuthedRouteChildren: AppAuthedRouteChildren = {
+  AppAuthedAdvertisersRoute: AppAuthedAdvertisersRoute,
   AppAuthedCreateRoute: AppAuthedCreateRoute,
   AppAuthedEvaluationsRoute: AppAuthedEvaluationsRoute,
   AppAuthedLinksRoute: AppAuthedLinksRoute,

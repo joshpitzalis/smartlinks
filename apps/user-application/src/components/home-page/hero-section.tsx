@@ -28,21 +28,22 @@ export function HeroSection() {
 						className="mb-6 px-4 py-2 text-sm font-medium bg-primary/5 border-primary/20 text-primary"
 					>
 						<Sparkles className="mr-2 h-3 w-3" />
-						Trusted by 9999+ businesses worldwide
+						Trusted by 100+ builders worldwide
 					</Badge>
 
 					{/* Main headline */}
 					<h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold tracking-tight mb-6">
-						Stop Losing Revenue to{" "}
+						Build SaaS That's <br />
+						Already{" "}
 						<span className="bg-gradient-to-r from-primary via-primary to-purple-600 bg-clip-text text-transparent">
-							Broken Links
+							Proven Profitable.
 						</span>
 					</h1>
 
 					{/* Subheading */}
 					<p className="text-lg sm:text-xl text-muted-foreground mb-8 max-w-2xl mx-auto leading-relaxed">
-						Smart link management with AI monitoring and geo-routing that keeps
-						your traffic flowing and revenue growing.
+						Stop guessing. Access 14,500+ SaaS with real revenue, ads & tech
+						stacks. Build what users are already paying for.
 					</p>
 
 					{/* CTA Section */}
