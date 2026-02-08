@@ -1,3 +1,4 @@
+import type { AdSchemaType } from "@repo/data-ops/zod-schema/advertisers";
 import { useQuery } from "@tanstack/react-query";
 // import { glimpse } from "@/components/kibo-ui/glimpse/server";
 import groupBy from "lodash.groupby";
@@ -23,7 +24,6 @@ import {
 } from "@/components/kibo-ui/glimpse";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { trpc } from "@/router";
-import type { AdSchemaType } from "@/worker/trpc/routers/advertisers";
 
 export const Gantt = ({ page_id }: { page_id: string }) => {
 	const query = useQuery(

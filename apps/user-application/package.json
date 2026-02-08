@@ -52,6 +52,7 @@
 		"clsx": "^2.1.1",
 		"cmdk": "^1.1.1",
 		"date-fns": "^4.1.0",
+		"effect": "^3.19.15",
 		"framer-motion": "^12.28.1",
 		"hono": "^4.11.4",
 		"iso-3166-1": "^2.1.1",
@@ -79,6 +80,7 @@
 	},
 	"devDependencies": {
 		"@cloudflare/vite-plugin": "^1.21.1",
+		"@effect/language-service": "^0.72.0",
 		"@testing-library/dom": "^10.4.1",
 		"@testing-library/react": "^16.3.2",
 		"@types/lodash.groupby": "^4.6.9",
