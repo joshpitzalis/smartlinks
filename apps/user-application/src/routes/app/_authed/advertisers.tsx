@@ -1,16 +1,12 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { Effect } from "effect";
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Field } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
 import { CardImage } from "@/modules/ads-info/components/card";
-import { Gantt } from "@/modules/ads-info/gantt";
-import {
-	type FacebookPage,
-	mockUrlToPageIds,
-	UrlToPageIds,
-} from "@/modules/ads-info/services/url-to-pageId-service";
+import { Gantt } from "@/modules/ads-info/components/gantt-chart";
+import { queryClient, trpc } from "@/router";
+import type { FacebookPageResults } from "@/worker/services/getPages";
 
 export const Route = createFileRoute("/app/_authed/advertisers")({
 	component: RouteComponent,
@@ -19,7 +15,10 @@ export const Route = createFileRoute("/app/_authed/advertisers")({
 function RouteComponent() {
 	const [inputValue, setInputValue] = useState("");
 	const [pageId, setPageId] = useState("");
-	const [profileResults, setProfileResults] = useState<FacebookPage[]>([]);
+
+	const [profileResults, setProfileResults] = useState<FacebookPageResults[]>(
+		[],
+	);
 	const [searchKey, setSearchKey] = useState(0);
 
 	const handleSubmit = (e: React.FormEvent) => {
@@ -30,28 +29,16 @@ function RouteComponent() {
 		}
 	};
 
-	const handleProfileSearch = (query: string) =>
-		Effect.runPromise(
-			getFacebookProfiles(query).pipe(
-				Effect.provideService(UrlToPageIds, mockUrlToPageIds),
-				Effect.match({
-					onFailure: (_error) => {
-						//       switch (error._tag) {
-						//         case "DbError":
-						//           console.error("Problem with the
-						// database");
-						//         case "NoUserFoundError":
-						//           console.error("no user found");
-						//         default: {
-						//           const _exhaustive: never = error;
-						//           return _exhaustive;
-						//         }
-						//       }
-					},
-					onSuccess: (results) => setProfileResults(results),
-				}),
-			),
-		);
+	const handleProfileSearch = async (query: string) => {
+		try {
+			const results = await queryClient.fetchQuery(
+				trpc.advertisers.searchPages.queryOptions({ query }),
+			);
+			setProfileResults(results);
+		} catch (error) {
+			console.error("Error searching pages:", error);
+		}
+	};
 
 	return (
 		<div className="p-6">
@@ -71,6 +58,7 @@ function RouteComponent() {
 
 			<div className="mt-2 flex justify-start flex-wrap" key={searchKey}>
 				{!pageId &&
+					profileResults.length &&
 					profileResults?.map((profile) => (
 						<CardImage
 							key={profile.page_id}
@@ -85,12 +73,3 @@ function RouteComponent() {
 	);
 }
 
-const getFacebookProfiles = (query: string) =>
-	Effect.gen(function* () {
-		const { getPageIds } = yield* UrlToPageIds;
-		// const user = yield* getUser(id);
-		// if (!user) {
-		//   return yield* new NoUserFoundError({ id });
-		// }
-		return getPageIds(query);
-	});

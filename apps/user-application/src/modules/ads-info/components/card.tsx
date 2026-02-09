@@ -9,7 +9,7 @@ import {
 	CardHeader,
 	CardTitle,
 } from "@/components/ui/card";
-import type { FacebookPage } from "@/modules/ads-info/services/url-to-pageId-service";
+import type { FacebookPage } from "@/modules/ads-info/services";
 
 export function CardImage({
 	profile,
@@ -36,7 +36,10 @@ export function CardImage({
 				<CardDescription>{profile.category}</CardDescription>
 			</CardHeader>
 			<CardFooter>
-				<Button className="w-full" onClick={() => setPageId(profile.page_id)}>
+				<Button
+					className="w-full cursor-pointer"
+					onClick={() => setPageId(profile.page_id)}
+				>
 					Show Ads
 				</Button>
 			</CardFooter>
