@@ -7,3 +7,5 @@ export class SearchAPIError extends Data.TaggedError("SearchAPIError")<{
 export class ParseError extends Data.TaggedError("ParseError")<{
 	cause: unknown;
 }> {}
+
+export class NoResultsError extends Data.TaggedError("NoResultsError")<{}> {}

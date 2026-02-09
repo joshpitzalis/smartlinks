@@ -1,8 +1,8 @@
 import type { MetaAdLibraryResponseSchema } from "@repo/data-ops/zod-schema/advertisers";
 import { Context } from "effect";
 import type { z } from "zod";
-import { fakeAdData } from "@/worker/trpc/routers/dummy-data";
-import type { FacebookPageResults } from "../../../../worker/services/getPages";
+import type { FacebookPageResults } from "@/worker/features/metaAds/schemas";
+import { fakeAdData } from "@/worker/features/metaAds/tests/dummy-data";
 
 // export type FacebookPage = {
 // 	page_id: string;

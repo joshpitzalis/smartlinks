@@ -6,7 +6,7 @@ import { Input } from "@/components/ui/input";
 import { CardImage } from "@/modules/ads-info/components/card";
 import { Gantt } from "@/modules/ads-info/components/gantt-chart";
 import { queryClient, trpc } from "@/router";
-import type { FacebookPageResults } from "@/worker/services/getPages";
+import type { FacebookPageResults } from "@/worker/features/metaAds/schemas";
 
 export const Route = createFileRoute("/app/_authed/advertisers")({
 	component: RouteComponent,
@@ -72,4 +72,3 @@ function RouteComponent() {
 		</div>
 	);
 }
-

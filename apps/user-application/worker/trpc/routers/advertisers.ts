@@ -1,11 +1,14 @@
 import { getAdvertisers } from "@repo/data-ops/queries/advertisers";
 import { TRPCError } from "@trpc/server";
-import { Effect, ParseResult } from "effect";
+import { Effect } from "effect";
 import { z } from "zod";
 import { getPages } from "@/worker/features/metaAds/effects";
-import { fakeAdData } from "@/worker/trpc/routers/dummy-data";
+import { fakeAdData } from "@/worker/features/metaAds/tests/dummy-data";
 import { t } from "@/worker/trpc/trpc-instance";
-import { liveSearchAPI, SearchAPIService } from "../../services/getPages";
+import {
+	liveSearchAPI,
+	SearchAPIService,
+} from "../../services/SearchAPIService";
 
 // Key tRPC error codes:
 // BAD_REQUEST - Invalid input
@@ -19,54 +22,48 @@ import { liveSearchAPI, SearchAPIService } from "../../services/getPages";
 export const advertiserTrpcRoutes = t.router({
 	searchPages: t.procedure
 		.input(z.object({ query: z.string() }))
-		.query(async ({ input }) =>
-			Effect.runPromise(
-				getPages(input.query).pipe(
-					Effect.provideService(SearchAPIService, liveSearchAPI),
-					Effect.catchTags({
-						SearchAPIError: (error) =>
-							Effect.fail(
-								new TRPCError({
-									code: "BAD_GATEWAY",
-									message: "Search API request failed",
-									cause: error.cause,
-								}),
-							),
+		.query(async ({ input }) => {
+			const pageResults = getPages(input.query).pipe(
+				Effect.provideService(SearchAPIService, liveSearchAPI),
+				Effect.catchTags({
+					SearchAPIError: (error) =>
+						Effect.fail(
+							new TRPCError({
+								code: "BAD_GATEWAY",
+								message: "Search API request failed",
+								cause: error.cause,
+							}),
+						),
 
-						ConfigError: (error) =>
-							Effect.fail(
-								new TRPCError({
-									code: "INTERNAL_SERVER_ERROR",
-									message: "Server configuration error",
-									cause: error,
-								}),
-							),
-					}),
-
-					Effect.catchAll((error) => {
-						// Handle ParseResult.ParseError here
-						if (ParseResult.isParseError(error)) {
-							return Effect.fail(
-								new TRPCError({
-									code: "UNPROCESSABLE_CONTENT",
-									message: `Schema validation failed: ${ParseResult.TreeFormatter.formatErrorSync(error)}`,
-									cause: error,
-								}),
-							);
-						}
-
-						// Fallback for any other errors
-						return Effect.fail(
+					ConfigError: (error) =>
+						Effect.fail(
 							new TRPCError({
 								code: "INTERNAL_SERVER_ERROR",
-								message: "An unexpected error occurred",
+								message: "Server configuration error",
 								cause: error,
 							}),
-						);
-					}),
-				),
-			),
-		),
+						),
+
+					ParseError: (error) =>
+						Effect.fail(
+							new TRPCError({
+								code: "UNPROCESSABLE_CONTENT",
+								message: "Schema validation failed",
+								cause: error.cause,
+							}),
+						),
+
+					NoResultsError: () =>
+						Effect.fail(
+							new TRPCError({
+								code: "NOT_FOUND",
+								message: "No results found for the given query",
+							}),
+						),
+				}),
+			);
+			return Effect.runPromise(pageResults);
+		}),
 
 	getAllAdvertisers: t.procedure
 		.input(z.object({ page_id: z.string() }))

@@ -2393,7 +2393,7 @@ export const fakeAdData = {
 	],
 };
 
-const pageSearch = {
+export const startbucksPages = {
 	search_metadata: {
 		id: "search_mR5DzpePyDIrDVrwl4YdGQno",
 		status: "Success",
@@ -2627,7 +2627,7 @@ const pageSearch = {
 	],
 };
 
-const pagesResults = {
+export const teslaPages = {
 	search_metadata: {
 		id: "search_KMjqpW46ERuY8GozJenbZ3LV",
 		status: "Success",

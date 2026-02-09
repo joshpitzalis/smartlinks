@@ -1,12 +1,6 @@
-import {
-	Config,
-	type ConfigError,
-	Context,
-	Effect,
-	type ParseResult,
-	Schema as S,
-} from "effect";
-import { SearchAPIError } from "../features/metaAds/errors";
+import { Config, type ConfigError, Context, Effect, Schema as S } from "effect";
+import { teslaPages } from "@/worker/features/metaAds/tests/dummy-data";
+import { ParseError, SearchAPIError } from "../features/metaAds/errors";
 import {
 	MetaAdsResponseSchema,
 	type PageResultSchema,
@@ -20,7 +14,7 @@ export class SearchAPIService extends Context.Tag("SearchAPIService")<
 			query: string,
 		) => Effect.Effect<
 			Array<S.Schema.Type<typeof PageResultSchema>>,
-			SearchAPIError | ParseResult.ParseError | ConfigError.ConfigError
+			SearchAPIError | ParseError | ConfigError.ConfigError
 		>;
 	}
 >() {}
@@ -48,7 +42,9 @@ export const liveSearchAPI: Context.Tag.Service<SearchAPIService> = {
 				catch: (error) => new SearchAPIError({ cause: error }),
 			});
 
-			const metaAds = yield* S.decodeUnknown(MetaAdsResponseSchema)(json);
+			const metaAds = yield* S.decodeUnknown(MetaAdsResponseSchema)(json).pipe(
+				Effect.mapError((e) => new ParseError({ cause: e })),
+			);
 
 			// Explicitly return non-undefined array
 			return (metaAds.page_results ?? []) as Array<
@@ -58,13 +54,5 @@ export const liveSearchAPI: Context.Tag.Service<SearchAPIService> = {
 };
 
 export const testSearchAPI: Context.Tag.Service<SearchAPIService> = {
-	searchPages: (_query: string) =>
-		Effect.succeed([
-			{
-				page_id: "123",
-				name: "Test Page",
-				category: "Business",
-				likes: 1000,
-			},
-		]),
+	searchPages: (_query: string) => Effect.succeed(teslaPages.page_results),
 };
