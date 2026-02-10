@@ -1,13 +1,21 @@
 import { Effect } from "effect";
 import { describe, expect, it, test } from "vitest";
-import { getPages } from "@/worker/features/metaAds/effects";
+import { getAdvertiser, getPages } from "@/worker/features/metaAds/effects";
 import { NoResultsError } from "@/worker/features/metaAds/errors";
+import {
+	D1Database,
+	stagingDBAPI,
+	testDBAPI,
+} from "@/worker/services/D1Database";
 import {
 	SearchAPIService,
 	testSearchAPI,
 } from "@/worker/services/SearchAPIService";
-import { cleanQuery } from "../utils";
-import { teslaPages } from "./dummy-data";
+import { santize } from "../utils";
+import { fakeAdData, teslaPages } from "./dummy-data";
+import {
+  R2Storage, testR2API
+} from "@/worker/services/R2Storage";
 
 describe("how page searches work", () => {
 	it("should return pageIds when given a query", async () => {
@@ -29,7 +37,15 @@ describe("how page searches work", () => {
 		expect(error).toBeInstanceOf(NoResultsError);
 	});
 
-	it.todo("cache results to a database", async () => {});
+	it.only("cache results to a database", async () => {
+		const adverstiserData = await Effect.runPromise(
+			getAdvertiser("page_id").pipe(
+				Effect.provideService(SearchAPIService, testSearchAPI),
+				Effect.provideService(R2Storage, testR2API()),
+			),
+		);
+		expect(adverstiserData).toEqual(fakeAdData.ads);
+	});
 	it.todo("search the database for a cache result before triggering the API", async () => {});
 });
 
@@ -98,15 +114,17 @@ describe("how query validation works", () => {
 
 	// You could also use `it.each`
 	test.each(testCases)("$name", ({ input, expected }) => {
-		const result = cleanQuery(input);
+		const result = santize(input);
 		expect(result).toBe(expected);
 	});
 });
 
 describe("how advertiser Pages work", () => {
-	it.todo("should remove the Gannt chart when I enter a new page search", async () => {});
+  it.todo("should remove the Gannt chart when I enter a new page search", async () => { });
+		it.todo("loading state when its searching for stuff", async () => {});
 });
 
 describe("hows ads work", () => {
-	it.todo("not sure yet...", async () => {});
+	it.todo("show all the ads stored in the data base for a query", async () => {});
+	it.todo("queues a query for search if it is not in the databse", async () => {});
 });

@@ -30,6 +30,11 @@
 					"remote": true
 				}
 			],
+			"r2_buckets": [{
+			"binding": "ADVERTISER_STORAGE",
+			"bucket_name": "seewhatworked-advertisers-staging",
+			"remote": true
+			}],
 			"services": [
 				{
 					"binding": "BACKEND_SERVICE",

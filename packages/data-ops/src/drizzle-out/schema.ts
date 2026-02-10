@@ -36,5 +36,36 @@ export const destinationEvaluations = sqliteTable("destination_evaluations", {
 },
 (table) => [
 	index("idx_destination_evaluations_account_time").on(table.accountId, table.createdAt),
-]);
+  ]);
 
+export const ads = sqliteTable("ads", {
+	adId: text("ad_id").primaryKey().notNull(),
+	pageId: text("page_id").notNull(),
+	created: numeric().default(sql`(CURRENT_TIMESTAMP)`).notNull(),
+	updated: numeric().default(sql`(CURRENT_TIMESTAMP)`).notNull(),
+	name: text().notNull(),
+});
+
+
+ad_archive_id: Schema.optionalWith(Schema.String, { exact: true }),
+	collation_count: Schema.optionalWith(Schema.Number, { exact: true }),
+	collation_id: Schema.optionalWith(Schema.String, { exact: true }),
+	// page_id: Schema.optionalWith(Schema.String, { exact: true }),
+	snapshot: Schema.optionalWith(SnapshotSchema, { exact: true }),
+	is_active: Schema.optionalWith(Schema.Boolean, { exact: true }),
+	page_name: Schema.optionalWith(Schema.String, { exact: true }),
+	impressions_with_index: Schema.optionalWith(
+		Schema.Struct({
+			impressions_index: Schema.optionalWith(Schema.Number, { exact: true }),
+		}),
+		{ exact: true },
+	),
+	gated_type: Schema.optionalWith(Schema.String, { exact: true }),
+	categories: Schema.optionalWith(Schema.Array(Schema.String), { exact: true }),
+	is_aaa_eligible: Schema.optionalWith(Schema.Boolean, { exact: true }),
+	end_date: Schema.optionalWith(Schema.String, { exact: true }),
+	publisher_platform: Schema.optionalWith(Schema.Array(Schema.String), {
+		exact: true,
+	}),
+	start_date: Schema.optionalWith(Schema.String, { exact: true }),
+	hide_data_status: Schema.optionalWith(Schema.String, { exact: true }),

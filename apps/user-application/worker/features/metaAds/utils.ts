@@ -1,4 +1,4 @@
-export const cleanQuery = (query: string) => {
+export const santize = (query: string) => {
 	const trimmed = query.trim();
 
 	if (trimmed.includes("://")) {

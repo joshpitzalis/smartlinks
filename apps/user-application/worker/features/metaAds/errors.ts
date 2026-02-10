@@ -9,3 +9,23 @@ export class ParseError extends Data.TaggedError("ParseError")<{
 }> {}
 
 export class NoResultsError extends Data.TaggedError("NoResultsError")<{}> {}
+
+export class R2SaveError extends Data.TaggedError("R2SaveError")<{
+  cause: unknown;
+  id: 'ADVERTISER_STORAGE'
+}> {}
+
+export class R2FetchError extends Data.TaggedError("R2FetchError")<{
+  cause: unknown;
+  id: 'ADVERTISER_STORAGE'
+}> { }
+
+export class R2ParseError extends Data.TaggedError("R2ParseError")<{
+  cause: unknown;
+  id: 'ADVERTISER_STORAGE'
+}> { }
+
+
+export class GetAdvertisersFetchError extends Data.TaggedError("GetAdvertisersFetchError")<{
+  cause: unknown;
+}> {}

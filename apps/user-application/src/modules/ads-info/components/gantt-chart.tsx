@@ -36,7 +36,7 @@ export const Gantt = ({ page_id }: { page_id: string }) => {
 		return <div>Error!</div>;
 	}
 
-	const features = (query.data?.ads ?? []).map((f) => ({
+	const features = (query.data ?? []).map((f) => ({
 		...f,
 		id: f.ad_archive_id,
 		name: f.page_name,

@@ -1,14 +1,15 @@
-import { getAdvertisers } from "@repo/data-ops/queries/advertisers";
+// import { getAdvertisers } from "@repo/data-ops/queries/advertisers";
 import { TRPCError } from "@trpc/server";
 import { Effect } from "effect";
 import { z } from "zod";
-import { getPages } from "@/worker/features/metaAds/effects";
-import { fakeAdData } from "@/worker/features/metaAds/tests/dummy-data";
+import { getAdvertiser, getPages } from "@/worker/features/metaAds/effects";
 import { t } from "@/worker/trpc/trpc-instance";
 import {
+  testSearchAPI,
 	liveSearchAPI,
-	SearchAPIService,
+  SearchAPIService,
 } from "../../services/SearchAPIService";
+import {R2Storage, stagingR2API} from '../../services/R2Storage'
 
 // Key tRPC error codes:
 // BAD_REQUEST - Invalid input
@@ -67,14 +68,66 @@ export const advertiserTrpcRoutes = t.router({
 
 	getAllAdvertisers: t.procedure
 		.input(z.object({ page_id: z.string() }))
-		.query(async ({ input }) => {
-			const { page_id } = input;
-			console.log("Fetching advertisers for page_id:", page_id);
+		.query(async ({ input, ctx }) => {
+
+
+			const adFetcher =
+        getAdvertiser(input.page_id).pipe(
+          Effect.provideService(SearchAPIService, liveSearchAPI),
+          Effect.provideService(R2Storage, stagingR2API(ctx.env)),
+          Effect.catchTags({
+            GetAdvertisersFetchError: (error) =>
+              Effect.fail(
+                new TRPCError({
+                  code: "BAD_GATEWAY",
+                  message: "Failed to fetch ads",
+                  cause: error.cause,
+                }),
+              ),
+            ConfigError: (error) =>
+              Effect.fail(
+                new TRPCError({
+                  code: "INTERNAL_SERVER_ERROR",
+                  message: "Server configuration error",
+                  cause: error,
+                }),
+              ),
+            R2FetchError: (error) =>
+              Effect.fail(
+                new TRPCError({
+                  code: "INTERNAL_SERVER_ERROR",
+                  message: "Failed to read from storage",
+                  cause: error.cause,
+                }),
+              ),
+            R2ParseError: (error) =>
+              Effect.fail(
+                new TRPCError({
+                  code: "INTERNAL_SERVER_ERROR",
+                  message: "Failed to parse stored data",
+                  cause: error.cause,
+                }),
+              ),
+            R2SaveError: (error) =>
+              Effect.fail(
+                new TRPCError({
+                  code: "INTERNAL_SERVER_ERROR",
+                  message: "Failed to save to storage",
+                  cause: error.cause,
+                }),
+              ),
+          }),
+        )
+
+			return Effect.runPromise(adFetcher)
+
+      // const { page_id } = input;
 
 			// return getAdvertisers({
 			// 	page_id: page_id,
 			// 	api_key: process.env.SEARCH_API_KEY,
 			// });
-			return fakeAdData;
+
+			// return fakeAdData;
 		}),
 });

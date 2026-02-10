@@ -1,10 +1,15 @@
 import { Config, type ConfigError, Context, Effect, Schema as S } from "effect";
-import { teslaPages } from "@/worker/features/metaAds/tests/dummy-data";
-import { ParseError, SearchAPIError } from "../features/metaAds/errors";
 import {
+	fakeAdData,
+	teslaPages,
+} from "@/worker/features/metaAds/tests/dummy-data";
+import { ParseError, SearchAPIError, GetAdvertisersFetchError } from "../features/metaAds/errors";
+import {
+	type AdSchema,
 	MetaAdsResponseSchema,
 	type PageResultSchema,
 } from "../features/metaAds/schemas";
+import {getAdvertisers} from '@repo/data-ops/queries/advertisers'
 
 // Port
 export class SearchAPIService extends Context.Tag("SearchAPIService")<
@@ -15,6 +20,12 @@ export class SearchAPIService extends Context.Tag("SearchAPIService")<
 		) => Effect.Effect<
 			Array<S.Schema.Type<typeof PageResultSchema>>,
 			SearchAPIError | ParseError | ConfigError.ConfigError
+		>;
+		readonly getAds: (
+			pageId: string,
+		) => Effect.Effect<
+			Array<S.Schema.Type<typeof AdSchema>>,
+			GetAdvertisersFetchError | ConfigError.ConfigError
 		>;
 	}
 >() {}
@@ -51,8 +62,17 @@ export const liveSearchAPI: Context.Tag.Service<SearchAPIService> = {
 				S.Schema.Type<typeof PageResultSchema>
 			>;
 		}),
+	getAds: (pageId) => Effect.gen(function* () {
+		const api_key = yield* Config.string("SEARCH_API_KEY");
+		const result = yield* Effect.tryPromise({
+			try: () => getAdvertisers({ page_id: pageId, api_key }),
+			catch: (error) => new GetAdvertisersFetchError({ cause: error }),
+		});
+		return result?.ads ?? [];
+	}),
 };
 
 export const testSearchAPI: Context.Tag.Service<SearchAPIService> = {
 	searchPages: (_query: string) => Effect.succeed(teslaPages.page_results),
+	getAds: () => Effect.succeed(fakeAdData.ads),
 };

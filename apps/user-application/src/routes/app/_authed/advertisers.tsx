@@ -34,6 +34,8 @@ function RouteComponent() {
 			const results = await queryClient.fetchQuery(
 				trpc.advertisers.searchPages.queryOptions({ query }),
 			);
+			// todo - if only 1 result comes back from searchPages then shortcircuit straght t showing teh gantt chart
+
 			setProfileResults(results);
 		} catch (error) {
 			console.error("Error searching pages:", error);
