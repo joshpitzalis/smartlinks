@@ -18,10 +18,16 @@ export class KVStore extends Context.Tag("KVStore")<
 	}
 >() {}
 
-export const testKVAPI = () => ({
-	getPageId: (_query: string) => Effect.succeed(null as string | null),
-	savePagename: (_pagename: string, _page_id: string) => Effect.void,
-});
+export const testKVAPI = {
+	getPageId: (_query: string) =>
+		Effect.succeed(null as string | null) as Effect.Effect<
+			string | null,
+			KVFetchError,
+			never
+		>,
+	savePagename: (_pagename: string, _page_id: string) =>
+		Effect.void as Effect.Effect<void, KVSaveError, never>,
+};
 
 export const stagingKVAPI = (env: Env) => ({
 	getPageId: (query: string) =>
