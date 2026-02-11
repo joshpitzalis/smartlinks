@@ -163,7 +163,7 @@ export const AdSchema = Schema.Struct({
 export const MetaAdLibraryResponseSchema = Schema.Struct({
 	search_metadata: AdMetadataSchema,
 	search_parameters: AdParametersSchema,
-	search_information:SearchInformationSchema,
+	search_information: SearchInformationSchema,
 	ads: Schema.Array(AdSchema),
 });
 

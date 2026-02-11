@@ -1,4 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
+import { Result } from "better-result";
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Field } from "@/components/ui/field";
@@ -34,9 +35,15 @@ function RouteComponent() {
 			const results = await queryClient.fetchQuery(
 				trpc.advertisers.searchPages.queryOptions({ query }),
 			);
-			// todo - if only 1 result comes back from searchPages then shortcircuit straght t showing teh gantt chart
-
-			setProfileResults(results);
+			if (typeof results === "string") {
+				setPageId(results);
+			} else if (results.length === 1) {
+				// if only 1 result comes back from searchPages then shortcircuit straight to showing the gantt chart
+				setPageId(results[0].page_id);
+			} else {
+				// Fallback: ensure we have an array in state.
+				setProfileResults(results);
+			}
 		} catch (error) {
 			console.error("Error searching pages:", error);
 		}

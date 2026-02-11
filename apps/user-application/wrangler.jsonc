@@ -30,11 +30,20 @@
 					"remote": true
 				}
 			],
-			"r2_buckets": [{
-			"binding": "ADVERTISER_STORAGE",
-			"bucket_name": "seewhatworked-advertisers-staging",
-			"remote": true
-			}],
+			"r2_buckets": [
+				{
+					"binding": "ADVERTISER_STORAGE",
+					"bucket_name": "seewhatworked-advertisers-staging",
+					"remote": true
+				}
+			],
+			"kv_namespaces": [
+				{
+					"binding": "CACHE",
+					"id": "dd1cfaabfc8c413faf01cb0ea8a69201",
+					"remote": true
+				}
+			],
 			"services": [
 				{
 					"binding": "BACKEND_SERVICE",
