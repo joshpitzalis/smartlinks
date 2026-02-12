@@ -9,17 +9,20 @@ import {
 	CardHeader,
 	CardTitle,
 } from "@/components/ui/card";
-import type { FacebookPage } from "@/modules/ads-info/services";
+import type { FacebookPageResults } from "@/worker/features/metaAds/schemas";
 
 export function CardImage({
 	profile,
 	setPageId,
 }: {
-	profile: FacebookPage;
+	profile: FacebookPageResults;
 	setPageId: Dispatch<SetStateAction<string>>;
 }) {
 	return (
-		<Card className="relative w-full max-w-sm pt-0 ml-4 mb-4">
+		<Card
+			className="relative w-full max-w-sm pt-0 ml-4 mb-4"
+			data-testid="advertiser-card"
+		>
 			<div className="absolute inset-0 z-30 aspect-video bg-black/35 rounded-t-3xl" />
 			<img
 				src={profile.image_uri}

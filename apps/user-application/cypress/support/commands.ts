@@ -1,4 +1,5 @@
 /// <reference types="cypress" />
+import "@testing-library/cypress/add-commands";
 
 Cypress.Commands.add("loginByGoogleApi", () => {
 	cy.log("Logging in to Google");
@@ -72,10 +73,21 @@ Cypress.Commands.add("loginByGoogleApi", () => {
 // -- This will overwrite an existing command --
 // Cypress.Commands.overwrite('visit', (originalFn, url, options) => { ... })
 
+Cypress.Commands.add("clearKVCache", (key: string) => {
+	return cy.request({
+		method: "DELETE",
+		url: `http://localhost:3000/api/test/cache/${encodeURIComponent(key)}`,
+		failOnStatusCode: false,
+	}).then((response) => {
+		cy.log(`Cleared cache for key: ${key} (status: ${response.status})`);
+	});
+});
+
 declare global {
 	namespace Cypress {
 		interface Chainable {
 			loginByGoogleApi(): Chainable<void>;
+			clearKVCache(key: string): Chainable<void>;
 		}
 	}
 }

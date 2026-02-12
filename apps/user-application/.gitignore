@@ -10,3 +10,6 @@ dist-ssr
 
 # opensrc - source code for packages
 opensrc/
+
+*storybook.log
+storybook-static

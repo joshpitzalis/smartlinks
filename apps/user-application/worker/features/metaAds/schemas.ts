@@ -36,6 +36,7 @@ export const PageResultSchema = S.Struct({
 	name: S.String,
 	entity_type: S.optional(S.String),
 	ig_username: S.optional(S.String),
+	ig_verification: S.optional(S.Boolean),
 	ig_followers: S.optional(S.Number),
 	page_alias: S.optional(S.String),
 });

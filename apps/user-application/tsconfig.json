@@ -10,7 +10,7 @@
 		"jsx": "react-jsx",
 		"module": "ESNext",
 		"lib": ["ES2022", "DOM", "DOM.Iterable"],
-		"types": ["vite/client", "cypress"],
+		"types": ["vite/client", "cypress", "@testing-library/cypress"],
 
 		/* Bundler mode */
 		"moduleResolution": "bundler",
