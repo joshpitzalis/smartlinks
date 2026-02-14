@@ -15,6 +15,6 @@ export default defineConfig({
 	},
 	e2e: {
 		experimentalPromptCommand: true,
-		setupNodeEvents(on, config) {},
+		setupNodeEvents(_on, _config) {},
 	},
 });

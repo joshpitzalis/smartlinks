@@ -83,7 +83,7 @@ const SnapshotSchema = z
 
 const AdSchema = z
 	.object({
-		ad_archive_id: z.string().optional(),
+		ad_archive_id: z.string(),
 		collation_count: z.number().optional(),
 		collation_id: z.string().optional(),
 		page_id: z.string().optional(),
@@ -99,7 +99,7 @@ const AdSchema = z
 		is_aaa_eligible: z.boolean().optional(),
 		end_date: z.string().optional(),
 		publisher_platform: z.array(z.string()).optional(),
-		start_date: z.string().optional(),
+		start_date: z.string(),
 		hide_data_status: z.string().optional(),
 	})
 	.passthrough();

@@ -1,9 +1,5 @@
 import {
 	IconBadgeAd,
-	IconCirclePlusFilled,
-	IconDashboard,
-	IconLink,
-	IconReport,
 } from "@tabler/icons-react";
 import { useNavigate } from "@tanstack/react-router";
 import {
@@ -18,30 +14,30 @@ export function NavMain() {
 	const nav = useNavigate();
 
 	const items = [
-		{
-			title: "Dashboard",
-			navigate: () =>
-				nav({
-					to: "/app",
-				}),
-			icon: IconDashboard,
-		},
-		{
-			title: "Links",
-			navigate: () =>
-				nav({
-					to: "/app/links",
-				}),
-			icon: IconLink,
-		},
-		{
-			title: "Evaluations",
-			navigate: () =>
-				nav({
-					to: "/app/evaluations",
-				}),
-			icon: IconReport,
-		},
+		// {
+		// 	title: "Dashboard",
+		// 	navigate: () =>
+		// 		nav({
+		// 			to: "/app",
+		// 		}),
+		// 	icon: IconDashboard,
+		// },
+		// {
+		// 	title: "Links",
+		// 	navigate: () =>
+		// 		nav({
+		// 			to: "/app/links",
+		// 		}),
+		// 	icon: IconLink,
+		// },
+		// {
+		// 	title: "Evaluations",
+		// 	navigate: () =>
+		// 		nav({
+		// 			to: "/app/evaluations",
+		// 		}),
+		// 	icon: IconReport,
+		// },
 		{
 			title: "Advertisers",
 			navigate: () =>
@@ -56,7 +52,7 @@ export function NavMain() {
 		<SidebarGroup>
 			<SidebarGroupContent className="flex flex-col gap-2">
 				<SidebarMenu>
-					<SidebarMenuItem className="flex items-center gap-2">
+					{/*<SidebarMenuItem className="flex items-center gap-2">
 						<SidebarMenuButton
 							onClick={() =>
 								nav({
@@ -69,7 +65,7 @@ export function NavMain() {
 							<IconCirclePlusFilled />
 							<span>Create Link</span>
 						</SidebarMenuButton>
-					</SidebarMenuItem>
+					</SidebarMenuItem>*/}
 				</SidebarMenu>
 				<SidebarMenu>
 					{items.map((item) => (

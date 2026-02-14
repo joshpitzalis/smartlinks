@@ -80,7 +80,7 @@ App.on(["POST", "GET"], "/api/auth/*", (c) => {
 // Test-only endpoint to clear KV cache entries
 App.delete("/api/test/cache/:key", async (c) => {
 	// Only allow in non-production environments
-	if (c.env.ENVIRONMENT === "production") {
+	if (c.env.CLOUDFLARE_ENV === "production") {
 		return c.json({ error: "Not allowed in production" }, 403);
 	}
 

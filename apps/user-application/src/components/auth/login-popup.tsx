@@ -38,7 +38,7 @@ export function LoginPopup({ children }: LoginPopupProps) {
 		setLoading(true);
 		await authClient.signIn.social({
 			provider: "google",
-			callbackURL: "/app",
+			callbackURL: "/app/advertisers",
 		});
 		setLoading(false);
 	};

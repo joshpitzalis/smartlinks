@@ -137,7 +137,7 @@ const SnapshotSchema = Schema.Struct({
 });
 
 export const AdSchema = Schema.Struct({
-	ad_archive_id: Schema.optionalWith(Schema.String, { exact: true }),
+	ad_archive_id: Schema.String,
 	collation_count: Schema.optionalWith(Schema.Number, { exact: true }),
 	collation_id: Schema.optionalWith(Schema.String, { exact: true }),
 	page_id: Schema.optionalWith(Schema.String, { exact: true }),
@@ -157,7 +157,7 @@ export const AdSchema = Schema.Struct({
 	publisher_platform: Schema.optionalWith(Schema.Array(Schema.String), {
 		exact: true,
 	}),
-	start_date: Schema.optionalWith(Schema.String, { exact: true }),
+	start_date: Schema.String,
 	hide_data_status: Schema.optionalWith(Schema.String, { exact: true }),
 });
 

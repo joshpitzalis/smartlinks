@@ -1,5 +1,17 @@
+// import {
+// 	QueryClient,
+// 	// QueryClientProvider
+// } from "@tanstack/react-query";
+// import { render, screen, waitFor } from "@testing-library/react";
 import { Effect } from "effect";
-import { describe, expect, it, test } from "vitest";
+import {
+	// beforeEach,
+	describe,
+	expect,
+	it,
+	test,
+	// vi
+} from "vitest";
 import { getAdvertiser, getPages } from "@/worker/features/metaAds/effects";
 import { NoResultsError } from "@/worker/features/metaAds/errors";
 
@@ -117,18 +129,70 @@ describe("how query validation works", () => {
 	});
 });
 
-describe("hows ads work", () => {
-	it.todo("show all the ads stored in the data base for a query", async () => {});
-	it.todo("queues a query for search if it is not in the database", async () => {});
-});
-
 describe("Advertiser Page frontend", () => {
+	// let queryClient: QueryClient;
+
+	// beforeEach(() => {
+	// 	// Create a fresh QueryClient for each test
+	// 	queryClient = new QueryClient({
+	// 		defaultOptions: {
+	// 			queries: {
+	// 				retry: false,
+	// 			},
+	// 		},
+	// 	});
+	// });
+
+	// it("show ads on homepage by default", async () => {
+	// 	// Import the RouteComponent
+	// 	const { Route } = await import("@/routes/app/_authed/advertisers");
+	// 	const RouteComponent = Route.options.component as React.ComponentType;
+
+	// 	// Mock the trpc getAllAdvertisers query to return ads
+	// 	const mockAds = fakeAdData.ads;
+
+	// 	// Mock queryClient.fetchQuery to return featured page data
+	// 	vi.spyOn(queryClient, 'fetchQuery').mockResolvedValue(mockAds);
+
+	// 	// Render the component with QueryClientProvider
+	// 	const { container } = render(
+	// 		<QueryClientProvider client={queryClient}>
+	// 			<RouteComponent />
+	// 		</QueryClientProvider>
+	// 	);
+
+	// 	// Wait for the component to load and show ads
+	// 	// The component should automatically load ads for a featured/default page
+	// 	await waitFor(() => {
+	// 		// Check if the Gantt chart or ad content is rendered
+	// 		// We're looking for either "Loading..." or actual ad content
+	// 		const hasContent = container.textContent;
+	// 		expect(hasContent).toBeTruthy();
+	// 	});
+
+	// 	// Verify that ads are displayed (the Gantt component should be rendered)
+	// 	// This will fail initially because the component doesn't load ads by default
+	// 	const ganttChart = await waitFor(() => {
+	// 		// Look for elements that indicate ads are showing
+	// 		return screen.queryByText(/Loading.../) || container.querySelector('[data-testid="gantt"]');
+	// 	});
+
+	// 	expect(ganttChart).toBeTruthy();
+	// });
+	// minimum acceptable UI
+	it.todo("show no results if no results", async () => {});
+	it.todo("loading spinner", async () => {});
+	it.todo("best performing ad in homepage results ", async () => {});
 	it.todo("should remove the Gannt chart when I enter a new page search", async () => {});
-	it.todo("loading state when its searching for stuff", async () => {});
-	it.todo("front end minimum evolvable flow", async () => {});
 	it.todo("let me filter by sector, spend and impressions", async () => {});
 });
 
 describe("Payments", () => {
 	it.todo("dont load more than 5 companies for free accounts", async () => {});
+});
+
+describe("How ads work under the hood", () => {
+	// todo - test the caching and call mechanism works as expected
+	it.todo("show all the ads stored in the data base for a query", () => {});
+	it.todo("queues a query for search if it is not in the database", () => {});
 });

@@ -74,7 +74,7 @@ Cypress.Commands.add("loginByGoogleApi", () => {
 // Cypress.Commands.overwrite('visit', (originalFn, url, options) => { ... })
 
 Cypress.Commands.add("clearKVCache", (key: string) => {
-	return cy.request({
+	cy.request({
 		method: "DELETE",
 		url: `http://localhost:3000/api/test/cache/${encodeURIComponent(key)}`,
 		failOnStatusCode: false,

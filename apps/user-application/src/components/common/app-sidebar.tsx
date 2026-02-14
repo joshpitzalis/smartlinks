@@ -25,7 +25,9 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
 						>
 							<a href="#">
 								<IconEyeDotted className="!size-6" />
-								<span className="text-base font-semibold">See What Worked</span>
+								<span className="text-base font-semibold">
+									See What's Working
+								</span>
 							</a>
 						</SidebarMenuButton>
 					</SidebarMenuItem>

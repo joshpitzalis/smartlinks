@@ -24,7 +24,7 @@ export function Navigation() {
             </div>*/}
 						<IconEyeDotted className="w-8 h-8 text-primary" />
 						<span className="font-semibold text-foreground">
-							See What Worked
+							See What's Working
 						</span>
 					</div>
 					{isPending ? (

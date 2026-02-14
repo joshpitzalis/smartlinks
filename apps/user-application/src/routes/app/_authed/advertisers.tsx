@@ -1,5 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { Result } from "better-result";
+// import { Result } from "better-result";
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Field } from "@/components/ui/field";
@@ -51,11 +51,12 @@ function RouteComponent() {
 
 	return (
 		<div className="p-6">
+			{/*input field*/}
 			<form onSubmit={handleSubmit} className="mb-4 max-w-md">
 				<Field orientation="horizontal">
 					<Input
 						type="search"
-						placeholder="Facebook Page for..."
+						placeholder="Search for an advertiser..."
 						value={inputValue}
 						onChange={(e) => setInputValue(e.target.value)}
 					/>
@@ -65,17 +66,24 @@ function RouteComponent() {
 				</Field>
 			</form>
 
-			<div className="mt-2 flex justify-start flex-wrap" key={searchKey}>
-				{!pageId &&
-					profileResults.length &&
-					profileResults?.map((profile) => (
-						<CardImage
-							key={profile.page_id}
-							profile={profile}
-							setPageId={setPageId}
-						/>
-					))}
+			{/*page results*/}
+			<div
+				// className="mt-2 flex justify-between flex-wrap"
+				className="grid grid-cols-1 gap-5 sm:grid-cols-2 sm:gap-6 lg:grid-cols-3"
+				key={searchKey}
+			>
+				{!pageId && profileResults.length
+					? profileResults?.map((profile) => (
+							<CardImage
+								key={profile.page_id}
+								profile={profile}
+								setPageId={setPageId}
+							/>
+						))
+					: null}
 			</div>
+
+			{/*ads results*/}
 
 			{pageId && <Gantt key={searchKey} page_id={pageId} />}
 		</div>
