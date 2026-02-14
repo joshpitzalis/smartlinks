@@ -13,8 +13,8 @@
 		"cy": "pnpm cypress open",
 		"cf-typegen:staging": "wrangler types --env-interface Env --env staging",
 		"cf-typegen:production": "wrangler types --env-interface Env --env production",
-		"deploy:staging": "npm run build && wrangler deploy",
-		"deploy:production": "npm run build:production && wrangler deploy",
+		"deploy:staging": "npm run build && wrangler deploy --env staging",
+		"deploy:production": "npm run build:production && wrangler deploy --env production",
 		"storybook": "storybook dev -p 6006",
 		"build-storybook": "storybook build"
 	},
