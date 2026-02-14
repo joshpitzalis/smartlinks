@@ -76,3 +76,15 @@ App.on(["POST", "GET"], "/api/auth/*", (c) => {
 	const auth = getAuthInstance(c.env);
 	return auth.handler(c.req.raw);
 });
+
+// Test-only endpoint to clear KV cache entries
+App.delete("/api/test/cache/:key", async (c) => {
+	// Only allow in non-production environments
+	if (c.env.CLOUDFLARE_ENV === "production") {
+		return c.json({ error: "Not allowed in production" }, 403);
+	}
+
+	const key = c.req.param("key");
+	await c.env.CACHE.delete(key);
+	return c.json({ success: true, key });
+});
