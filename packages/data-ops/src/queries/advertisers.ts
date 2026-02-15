@@ -1,4 +1,6 @@
 import { z } from "zod";
+import { getDb } from "@/db/database";
+import { advertisers } from "@/drizzle-out/schema";
 import { MetaAdLibraryResponseSchema } from "@/zod/advertisers";
 
 export async function getAdvertisers({
@@ -104,3 +106,36 @@ export const MetaAdLibrarySearchSchema = z.object({
 export type MetaAdLibrarySearchParams = z.infer<
 	typeof MetaAdLibrarySearchSchema
 >;
+
+export async function addAdvertiser(data: {
+	pageId: string;
+	pageName: string | undefined;
+	categories: readonly string[] | undefined;
+	isAaaEligible: boolean | undefined;
+	pageProfileUri: string | undefined;
+	pageProfilePictureUrl: string | undefined;
+	pageCategories: readonly string[] | undefined;
+	pageLikeCount: number | undefined;
+}) {
+	const db = getDb();
+
+	const {
+		pageId,
+		pageName,
+		categories,
+		isAaaEligible,
+		pageProfileUri,
+		pageProfilePictureUrl,
+		pageLikeCount,
+	} = data;
+
+	await db.insert(advertisers).values({
+		pageId,
+		pageName,
+		categories: JSON.stringify(categories),
+		isAaaEligible: isAaaEligible ? 1 : 0,
+		pageProfileUri,
+		pageProfilePictureUrl,
+		pageLikeCount,
+	});
+}

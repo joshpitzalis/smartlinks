@@ -5,6 +5,7 @@ import { z } from "zod";
 import { getAdvertiser, getPages } from "@/worker/features/metaAds/effects";
 import { KVStore, stagingKVAPI } from "@/worker/services/KVStore";
 import { t } from "@/worker/trpc/trpc-instance";
+import { D1Database, stagingDBAPI } from "../../services/D1Database";
 import { R2Storage, stagingR2API } from "../../services/R2Storage";
 import {
 	liveSearchAPI,
@@ -74,6 +75,7 @@ export const advertiserTrpcRoutes = t.router({
 			const adFetcher = getAdvertiser(input.page_id).pipe(
 				Effect.provideService(SearchAPIService, liveSearchAPI),
 				Effect.provideService(R2Storage, stagingR2API(ctx.env)),
+				Effect.provideService(D1Database, stagingDBAPI),
 				Effect.catchTags({
 					GetAdvertisersFetchError: (error) =>
 						Effect.fail(

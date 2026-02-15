@@ -40,3 +40,7 @@ export class KVSaveError extends Data.TaggedError("KVSaveError")<{
 	cause: unknown;
 	id: "QUERY-CACHE";
 }> {}
+
+export class D1WriteError extends Data.TaggedError("ParseError")<{
+	cause: unknown;
+}> {}

@@ -1,10 +1,10 @@
 import { Effect } from "effect";
 import { R2Storage } from "@/worker/services/R2Storage";
-// import { D1Database } from "../../services/D1Database";
+import { D1Database } from "../../services/D1Database";
 import { KVStore } from "../../services/KVStore";
 import { SearchAPIService } from "../../services/SearchAPIService";
 import { NoResultsError } from "./errors";
-import { santize } from "./utils";
+import { extactAdvertiserData, santize } from "./utils";
 
 export const getPages = (query: string) =>
 	Effect.gen(function* () {
@@ -15,7 +15,7 @@ export const getPages = (query: string) =>
 		const cleanQuery = santize(query);
 
 		const existingPageId = yield* cache.getPageId(cleanQuery);
-		console.log({ existingPageId });
+
 		if (existingPageId) {
 			return existingPageId;
 		}
@@ -51,13 +51,30 @@ export const getAdvertiser = (pageId: string) =>
 	Effect.gen(function* () {
 		const searchAPI = yield* SearchAPIService;
 		const R2 = yield* R2Storage;
+		const D1 = yield* D1Database;
+
 		// check DB first
 		const adsLessThan30DaysOld = yield* R2.getAds(pageId);
+		const advertiserData = yield* D1.getAdvertiserData(pageId);
+
 		// if exists and is less than 30 days old then early return them
-		if (adsLessThan30DaysOld.length > 0) return adsLessThan30DaysOld;
+		if (adsLessThan30DaysOld.length > 0)
+			return {
+				advertiserData,
+				ads: adsLessThan30DaysOld,
+			};
+
 		// if not fetch fresh data
 		const freshAds = yield* searchAPI.getAds(pageId);
-		// then save advertiserData to DB
+
+		// then save Data to DB
+		// todo - these should happen at the same time.
+		const freshAdvertiserData = extactAdvertiserData(freshAds);
+		yield* D1.saveAdvertiserData(freshAdvertiserData);
 		yield* R2.saveAds(freshAds);
-		return freshAds;
+
+		return {
+			advertiserData,
+			ads: freshAds,
+		};
 	});

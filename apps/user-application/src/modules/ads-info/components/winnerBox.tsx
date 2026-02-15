@@ -57,7 +57,7 @@ const StoriesSet = ({ stories }: { stories: AdSchemaType[] }) => {
 			<StoriesContent>
 				{winners.map((item) => {
 					return (
-						<Story className="aspect-[3/4] w-[200px] basis-auto" key={item.id}>
+						<Story className="aspect-3/4 w-[200px] basis-auto" key={item.id}>
 							<StoryVideo src={item.mediaUrl} />
 							<StoryOverlay />
 							<StoryAuthor>

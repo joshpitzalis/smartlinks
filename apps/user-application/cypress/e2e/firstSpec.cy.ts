@@ -20,4 +20,10 @@ describe("template spec", () => {
 		// assert the API call is skipped and the cache result lets you jump straught to the ads
 		cy.findAllByText(/active-carousel/i);
 	});
+
+	it("save to d1 database when a query is searched for", () => {
+		cy.visit("http://localhost:3000/app/advertisers");
+		const testKey = "tesla";
+		cy.findByRole("searchbox").click().type(`${testKey}{enter}`);
+	});
 });
