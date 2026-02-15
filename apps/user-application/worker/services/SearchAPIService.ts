@@ -6,6 +6,7 @@ import {
 } from "@/worker/features/metaAds/tests/dummy-data";
 import {
 	GetAdvertisersFetchError,
+	NoInputError,
 	ParseError,
 	SearchAPIError,
 } from "../features/metaAds/errors";
@@ -29,7 +30,7 @@ export class SearchAPIService extends Context.Tag("SearchAPIService")<
 			pageId: string,
 		) => Effect.Effect<
 			Array<S.Schema.Type<typeof AdSchema>>,
-			GetAdvertisersFetchError | ConfigError.ConfigError
+			NoInputError | GetAdvertisersFetchError | ConfigError.ConfigError
 		>;
 	}
 >() {}
@@ -71,9 +72,12 @@ export const liveSearchAPI: Context.Tag.Service<SearchAPIService> = {
 				S.Schema.Type<typeof PageResultSchema>
 			>;
 		}),
-	getAds: (pageId) =>
+	getAds: (pageId: string) =>
 		Effect.gen(function* () {
 			const api_key = yield* Config.string("SEARCH_API_KEY");
+			if (!pageId?.trim()) {
+				return yield* new NoInputError();
+			}
 			const result = yield* Effect.tryPromise({
 				try: () => getAdvertisers({ page_id: pageId, api_key }),
 				catch: (error) => new GetAdvertisersFetchError({ cause: error }),

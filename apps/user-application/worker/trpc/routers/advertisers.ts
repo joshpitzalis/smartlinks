@@ -70,7 +70,7 @@ export const advertiserTrpcRoutes = t.router({
 		}),
 
 	getAllAdvertisers: t.procedure
-		.input(z.object({ page_id: z.string() }))
+		.input(z.object({ page_id: z.string().optional() }))
 		.query(async ({ input, ctx }) => {
 			const adFetcher = getAdvertiser(input.page_id).pipe(
 				Effect.provideService(SearchAPIService, liveSearchAPI),

@@ -9,7 +9,7 @@
 		"build:production": "vite build --mode production && tsc",
 		"serve": "vite preview",
 		"tests": "vitest run",
-		"typecheck": "tsc --noEmit",
+		"types": "tsc --noEmit",
 		"cy": "pnpm cypress open",
 		"cf-typegen:staging": "wrangler types --env-interface Env --env staging",
 		"cf-typegen:production": "wrangler types --env-interface Env --env production",

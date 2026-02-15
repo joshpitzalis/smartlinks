@@ -47,11 +47,16 @@ export const getPages = (query: string) =>
 	});
 
 // type = AdvertiserResultSchema
-export const getAdvertiser = (pageId: string) =>
+export const getAdvertiser = (pageId?: string) =>
 	Effect.gen(function* () {
 		const searchAPI = yield* SearchAPIService;
 		const R2 = yield* R2Storage;
 		const D1 = yield* D1Database;
+
+		if (!pageId?.trim()) {
+			const allAdvertisers = yield* D1.getAdvertiserData();
+			return allAdvertisers;
+		}
 
 		// check DB first
 		const adsLessThan30DaysOld = yield* R2.getAds(pageId);

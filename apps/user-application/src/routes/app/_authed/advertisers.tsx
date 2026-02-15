@@ -1,5 +1,5 @@
+import { useSuspenseQuery } from "@tanstack/react-query";
 import { createFileRoute } from "@tanstack/react-router";
-// import { Result } from "better-result";
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Field } from "@/components/ui/field";
@@ -11,9 +11,17 @@ import type { FacebookPageResults } from "@/worker/features/metaAds/schemas";
 
 export const Route = createFileRoute("/app/_authed/advertisers")({
 	component: RouteComponent,
+	loader: async ({ context: { queryClient, trpc } }) => {
+		await queryClient.prefetchQuery(
+			trpc.advertisers.getAllAdvertisers.queryOptions({}),
+		);
+	},
 });
 
 function RouteComponent() {
+	const { data } = useSuspenseQuery(
+		trpc.advertisers.getAllAdvertisers.queryOptions({}),
+	);
 	const [inputValue, setInputValue] = useState("");
 	const [pageId, setPageId] = useState("");
 
@@ -80,7 +88,14 @@ function RouteComponent() {
 								setPageId={setPageId}
 							/>
 						))
-					: null}
+					: Array.isArray(data) &&
+						data.map((profile) => (
+							<CardImage
+								key={profile.pageId}
+								profile={convertPageData(profile)}
+								setPageId={setPageId}
+							/>
+						))}
 			</div>
 
 			{/*ads results*/}
@@ -88,4 +103,43 @@ function RouteComponent() {
 			{pageId && <Gantt key={searchKey} page_id={pageId} />}
 		</div>
 	);
+}
+
+function convertPageData(input: {
+	pageId: string;
+	pageName: string | null;
+	categories: string | null;
+	isAaaEligible: number | null;
+	pageProfileUri: string | null;
+	pageProfilePictureUrl: string | null;
+	pageCategories: string | null;
+	pageLikeCount: number | null;
+	createdAt: string | null;
+	updatedAt: string | null;
+}): {
+	readonly name: string;
+	readonly page_id: string;
+	readonly category?: string | undefined;
+	readonly image_uri?: string | undefined;
+	readonly likes?: number | undefined;
+	readonly verification?: string | undefined;
+	readonly entity_type?: string | undefined;
+	readonly ig_username?: string | undefined;
+	readonly ig_verification?: boolean | undefined;
+	readonly ig_followers?: number | undefined;
+	readonly page_alias?: string | undefined;
+} {
+	return {
+		name: input.pageName ?? "",
+		page_id: input.pageId,
+		...(input.pageCategories && { category: input.pageCategories }),
+		...(input.pageProfilePictureUrl && {
+			image_uri: input.pageProfilePictureUrl,
+		}),
+		...(input.pageLikeCount !== null && { likes: input.pageLikeCount }),
+		...(input.isAaaEligible !== null && {
+			verification: input.isAaaEligible === 1 ? "verified" : "unverified",
+		}),
+		page_alias: input.pageProfileUri?.split("/").at(-1) ?? "",
+	};
 }

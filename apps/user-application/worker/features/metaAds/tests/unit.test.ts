@@ -46,7 +46,7 @@ describe("how page searches work", () => {
 		expect(adverstiserData.ads).toEqual(fakeAdData.ads);
 	});
 
-	it("store advertiser data in D1 storage", async () => {
+	it("store advertiser data in D1 storage when a query is made", async () => {
 		const saveAdvertiserSpy = vi.fn(testD1API.saveAdvertiserData);
 		const spiedD1API = { ...testD1API, saveAdvertiserData: saveAdvertiserSpy };
 
@@ -74,6 +74,28 @@ describe("how page searches work", () => {
 		};
 		expect(saveAdvertiserSpy).toHaveBeenCalledWith(mockAdvertiser);
 	});
+	it("fetches recent results from D1 storage on page load", async () => {
+		const getAdvertiserDataSpy = vi.fn(testD1API.getAdvertiserData);
+		const spiedD1API = {
+			...testD1API,
+			getAdvertiserData: getAdvertiserDataSpy,
+		};
+
+		await Effect.runPromise(
+			getAdvertiser(" ").pipe(
+				Effect.provideService(SearchAPIService, testSearchAPI),
+				Effect.provideService(R2Storage, {
+					...testR2API(),
+					getAds: (_pageId: string) => Effect.succeed([]),
+				}),
+				Effect.provideService(D1Database, spiedD1API),
+			),
+		);
+
+		expect(getAdvertiserDataSpy).toHaveBeenCalled();
+	});
+
+	it("shows a no-ads component if no ads exist for an advertiser", async () => {});
 });
 
 describe("how query validation works", () => {

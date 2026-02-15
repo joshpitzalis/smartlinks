@@ -1,3 +1,4 @@
+import { desc, eq } from "drizzle-orm";
 import { z } from "zod";
 import { getDb } from "@/db/database";
 import { advertisers } from "@/drizzle-out/schema";
@@ -33,7 +34,6 @@ export async function getAdvertisers({
 
 	const url = `${metaAdLibraryAPI}?${params.toString()}`;
 	try {
-		console.log("Connecting to:", url);
 		const response = await fetch(url, {
 			headers: {
 				"User-Agent": "Mozilla/5.0 (compatible; SmartLinks/1.0)",
@@ -138,4 +138,32 @@ export async function addAdvertiser(data: {
 		pageProfilePictureUrl,
 		pageLikeCount,
 	});
+}
+
+export async function getAdvertiserData(pageId?: string) {
+	const db = getDb();
+
+	if (pageId?.trim()) {
+		const result = await db
+			.select()
+			.from(advertisers)
+			.where(eq(advertisers.pageId, pageId))
+			.limit(1);
+
+		if (!result.length) {
+			return null;
+		}
+		return result;
+	}
+
+	const result = await db
+		.select()
+		.from(advertisers)
+		.orderBy(desc(advertisers.updatedAt))
+		.limit(25);
+
+	if (!result.length) {
+		return null;
+	}
+	return result;
 }
