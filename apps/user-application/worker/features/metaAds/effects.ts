@@ -34,11 +34,13 @@ export const getPages = (query: string) =>
 			pageResults,
 			(page) => {
 				const pagename = page.page_alias || page.ig_username;
+				// const pagename = page.page_name;
+				const pageId = page.page_id;
 
-				if (!pagename?.trim()) {
+				if (!pagename?.trim() || !pageId?.trim()) {
 					return Effect.void;
 				}
-				return cache.savePagename(pagename.toLowerCase(), page.page_id);
+				return cache.savePagename(pagename.toLowerCase(), pageId);
 			},
 			{ concurrency: 20 },
 		);
@@ -53,9 +55,13 @@ export const getAdvertiser = (pageId?: string) =>
 		const R2 = yield* R2Storage;
 		const D1 = yield* D1Database;
 
+		// if no pageId then return all advertisers to populate the dashboard
 		if (!pageId?.trim()) {
 			const allAdvertisers = yield* D1.getAdvertiserData();
-			return allAdvertisers;
+			return {
+				advertiserData: allAdvertisers,
+				ads: [],
+			};
 		}
 
 		// check DB first

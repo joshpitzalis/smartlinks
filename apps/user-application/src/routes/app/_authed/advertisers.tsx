@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Field } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
 import { CardImage } from "@/modules/ads-info/components/card";
+import { FilterBox } from "@/modules/ads-info/components/filterBox";
 import { Gantt } from "@/modules/ads-info/components/gantt-chart";
 import { queryClient, trpc } from "@/router";
 import type { FacebookPageResults } from "@/worker/features/metaAds/schemas";
@@ -22,6 +23,7 @@ function RouteComponent() {
 	const { data } = useSuspenseQuery(
 		trpc.advertisers.getAllAdvertisers.queryOptions({}),
 	);
+
 	const [inputValue, setInputValue] = useState("");
 	const [pageId, setPageId] = useState("");
 
@@ -43,6 +45,7 @@ function RouteComponent() {
 			const results = await queryClient.fetchQuery(
 				trpc.advertisers.searchPages.queryOptions({ query }),
 			);
+			console.log({ results });
 			if (typeof results === "string") {
 				setPageId(results);
 			} else if (results.length === 1) {
@@ -74,6 +77,7 @@ function RouteComponent() {
 				</Field>
 			</form>
 
+			<FilterBox />
 			{/*page results*/}
 			<div
 				// className="mt-2 flex justify-between flex-wrap"
@@ -88,11 +92,12 @@ function RouteComponent() {
 								setPageId={setPageId}
 							/>
 						))
-					: Array.isArray(data) &&
-						data.map((profile) => (
+					: Array.isArray(data.advertiserData) &&
+						data.advertiserData.map((profile) => (
 							<CardImage
 								key={profile.pageId}
 								profile={convertPageData(profile)}
+								// profile={profile}
 								setPageId={setPageId}
 							/>
 						))}
@@ -105,7 +110,7 @@ function RouteComponent() {
 	);
 }
 
-function convertPageData(input: {
+export function convertPageData(input: {
 	pageId: string;
 	pageName: string | null;
 	categories: string | null;

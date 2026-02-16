@@ -32,6 +32,7 @@ import {
 } from "@/components/kibo-ui/glimpse";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { trpc } from "@/router";
+import { convertPageData } from "../../../routes/app/_authed/advertisers";
 
 export const Gantt = ({ page_id }: { page_id: string }) => {
 	const query = useQuery(
@@ -44,7 +45,7 @@ export const Gantt = ({ page_id }: { page_id: string }) => {
 		return <div>Error!</div>;
 	}
 
-	const features = (query.data?.ads ?? []).map((f) => ({
+	const features = query.data?.ads?.map((f) => ({
 		...(f as Mutable<typeof f>),
 		id: f.ad_archive_id,
 		name: f.page_name ?? "",

@@ -9,8 +9,9 @@ import { D1Database, stagingDBAPI } from "../../services/D1Database";
 import { R2Storage, stagingR2API } from "../../services/R2Storage";
 import {
 	liveSearchAPI,
-	SearchAPIService,
 	// testSearchAPI,
+	// metaSearchAPI,
+	SearchAPIService,
 } from "../../services/SearchAPIService";
 
 // Key tRPC error codes:
@@ -27,7 +28,11 @@ export const advertiserTrpcRoutes = t.router({
 		.input(z.object({ query: z.string() }))
 		.query(async ({ input, ctx }) => {
 			const pageResults = getPages(input.query).pipe(
-				Effect.provideService(SearchAPIService, liveSearchAPI),
+				Effect.provideService(
+					SearchAPIService,
+					liveSearchAPI,
+					// metaSearchAPI,
+				),
 				Effect.provideService(KVStore, stagingKVAPI(ctx.env)),
 				Effect.catchTags({
 					SearchAPIError: (error) =>
