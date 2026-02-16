@@ -1,6 +1,6 @@
 import { useSuspenseQuery } from "@tanstack/react-query";
 import { createFileRoute } from "@tanstack/react-router";
-import { useState } from "react";
+import { useEffect, useReducer, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Field } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
@@ -19,10 +19,55 @@ export const Route = createFileRoute("/app/_authed/advertisers")({
 	},
 });
 
+interface State {
+	idle: boolean;
+	searching: boolean;
+	loading: boolean;
+	pageResults: boolean;
+	adGraph: boolean;
+	effects: Effect[];
+	data?: any;
+}
+
+type Action =
+	| { type: "SEARCH" }
+	| { type: "CACHED_RESULT"; data: any }
+	| { type: "PAGE_RESULTS"; data: any };
+type Effect = "FETCH_DATA";
+
+const reducer = (currentState: State, event: Action) => {
+	if (event.type === "SEARCH") {
+		return {
+			...currentState,
+			loading: true,
+			effects: ["FETCH_DATA"] as Effect[],
+		};
+	}
+	if (event.type === "PAGE_RESULTS") {
+		return {
+			...currentState,
+			loading: false,
+			pageResults: true,
+			effects: [] as Effect[],
+			data: event.data,
+		};
+	}
+	return currentState;
+};
+
 function RouteComponent() {
 	const { data } = useSuspenseQuery(
 		trpc.advertisers.getAllAdvertisers.queryOptions({}),
 	);
+
+	const [state, send] = useReducer(reducer, {
+		idle: false,
+		searching: false,
+		loading: false,
+		pageResults: false,
+		adGraph: false,
+		effects: [],
+	});
 
 	const [inputValue, setInputValue] = useState("");
 	const [pageId, setPageId] = useState("");
@@ -32,38 +77,77 @@ function RouteComponent() {
 	);
 	const [searchKey, setSearchKey] = useState(0);
 
-	const handleSubmit = (e: React.FormEvent) => {
-		e.preventDefault();
-		if (inputValue.trim()) {
-			handleProfileSearch(inputValue.trim());
-			setSearchKey((k) => k + 1);
-		}
-	};
+	// const handleSubmit = (e: React.FormEvent) => {
+	// 	e.preventDefault();
+	// 	if (inputValue.trim()) {
+	// 		handleProfileSearch(inputValue.trim());
+	// 		setSearchKey((k) => k + 1);
+	// 	}
+	// };
 
-	const handleProfileSearch = async (query: string) => {
-		try {
-			const results = await queryClient.fetchQuery(
-				trpc.advertisers.searchPages.queryOptions({ query }),
-			);
-			console.log({ results });
-			if (typeof results === "string") {
-				setPageId(results);
-			} else if (results.length === 1) {
-				// if only 1 result comes back from searchPages then shortcircuit straight to showing the gantt chart
-				setPageId(results[0].page_id);
-			} else {
-				// Fallback: ensure we have an array in state.
-				setProfileResults(results);
+	// const handleProfileSearch = async (query: string) => {
+	// 	try {
+	// 		const results = await queryClient.fetchQuery(
+	// 			trpc.advertisers.searchPages.queryOptions({ query }),
+	// 		);
+	// 		console.log({ results });
+	// 		if (typeof results === "string") {
+	// 			setPageId(results);
+	// 		} else if (results.length === 1) {
+	// 			// if only 1 result comes back from searchPages then shortcircuit straight to showing the gantt chart
+	// 			setPageId(results[0].page_id);
+	// 		} else {
+	// 			// Fallback: ensure we have an array in state.
+	// 			setProfileResults(results);
+	// 		}
+	// 	} catch (error) {
+	// 		console.error("Error searching pages:", error);
+	// 	}
+	// };
+
+	useEffect(() => {
+		console.log({ state });
+		state.effects?.forEach(async (effect) => {
+			if (effect === "FETCH_DATA") {
+				if (inputValue.trim()) {
+					// handleProfileSearch(inputValue.trim());
+					const query = inputValue.trim();
+					try {
+						const results = await queryClient.fetchQuery(
+							trpc.advertisers.searchPages.queryOptions({ query }),
+						);
+						console.log({ results });
+						if (typeof results === "string") {
+							setPageId(results);
+							// send({ type: "CACHED_RESULT", data: results });
+						} else if (results.length === 1) {
+							// if only 1 result comes back from searchPages then shortcircuit straight to showing the gantt chart
+							setPageId(results[0].page_id);
+						} else {
+							// Fallback: ensure we have an array in state.
+
+							// setProfileResults(results);
+							send({ type: "PAGE_RESULTS", data: results });
+						}
+					} catch (error) {
+						console.error("Error searching pages:", error);
+					}
+					setSearchKey((k) => k + 1);
+				}
 			}
-		} catch (error) {
-			console.error("Error searching pages:", error);
-		}
-	};
+		});
+	}, [state, inputValue]);
 
 	return (
 		<div className="p-6">
 			{/*input field*/}
-			<form onSubmit={handleSubmit} className="mb-4 max-w-md">
+			<form
+				onSubmit={(e) => {
+					e.preventDefault();
+					send({ type: "SEARCH" });
+				}}
+				className="mb-4 max-w-md"
+			>
 				<Field orientation="horizontal">
 					<Input
 						type="search"
@@ -84,8 +168,8 @@ function RouteComponent() {
 				className="grid grid-cols-1 gap-5 sm:grid-cols-2 sm:gap-6 lg:grid-cols-3"
 				key={searchKey}
 			>
-				{!pageId && profileResults.length
-					? profileResults?.map((profile) => (
+				{!pageId && state.data?.length
+					? state.data?.map((profile) => (
 							<CardImage
 								key={profile.page_id}
 								profile={profile}
@@ -103,9 +187,7 @@ function RouteComponent() {
 						))}
 			</div>
 
-			{/*ads results*/}
-
-			{pageId && <Gantt key={searchKey} page_id={pageId} />}
+			{/*{pageId && <Gantt key={searchKey} page_id={pageId} />}*/}
 		</div>
 	);
 }
