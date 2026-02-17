@@ -43,6 +43,22 @@ export const advertiserTrpcRoutes = t.router({
 								cause: error.cause,
 							}),
 						),
+					KVFetchError: (error) =>
+						Effect.fail(
+							new TRPCError({
+								code: "INTERNAL_SERVER_ERROR",
+								message: "KV fetch error",
+								cause: error.cause,
+							}),
+						),
+					KVSaveError: (error) =>
+						Effect.fail(
+							new TRPCError({
+								code: "INTERNAL_SERVER_ERROR",
+								message: "KV Save error",
+								cause: error.cause,
+							}),
+						),
 
 					ConfigError: (error) =>
 						Effect.fail(
@@ -71,7 +87,7 @@ export const advertiserTrpcRoutes = t.router({
 						),
 				}),
 			);
-			return Effect.runPromise(pageResults);
+			return runSafe(pageResults);
 		}),
 
 	getAllAdvertisers: t.procedure
@@ -102,10 +118,38 @@ export const advertiserTrpcRoutes = t.router({
 						Effect.fail(
 							new TRPCError({
 								code: "INTERNAL_SERVER_ERROR",
-								message: "Failed to read from storage",
+								message: "Failed to read from R2 storage",
 								cause: error.cause,
 							}),
 						),
+
+					R2SaveError: (error) =>
+						Effect.fail(
+							new TRPCError({
+								code: "INTERNAL_SERVER_ERROR",
+								message: "Failed to save to R2 storage",
+								cause: error.cause,
+							}),
+						),
+
+					D1ReadError: (error) =>
+						Effect.fail(
+							new TRPCError({
+								code: "INTERNAL_SERVER_ERROR",
+								message: "Failed to read from D1 storage",
+								cause: error.cause,
+							}),
+						),
+
+					D1WriteError: (error) =>
+						Effect.fail(
+							new TRPCError({
+								code: "INTERNAL_SERVER_ERROR",
+								message: "Failed to write to D1 storage",
+								cause: error.cause,
+							}),
+						),
+
 					R2ParseError: (error) =>
 						Effect.fail(
 							new TRPCError({
@@ -114,26 +158,30 @@ export const advertiserTrpcRoutes = t.router({
 								cause: error.cause,
 							}),
 						),
-					R2SaveError: (error) =>
+
+					NoResultsError: (error) =>
 						Effect.fail(
 							new TRPCError({
-								code: "INTERNAL_SERVER_ERROR",
-								message: "Failed to save to storage",
+								code: "NOT_FOUND",
+								message: "No results found",
+								cause: error.cause,
+							}),
+						),
+
+					NoInputError: (error) =>
+						Effect.fail(
+							new TRPCError({
+								code: "BAD_REQUEST",
+								message: "No input provided",
 								cause: error.cause,
 							}),
 						),
 				}),
 			);
 
-			return Effect.runPromise(adFetcher);
-
-			// const { page_id } = input;
-
-			// return getAdvertisers({
-			// 	page_id: page_id,
-			// 	api_key: process.env.SEARCH_API_KEY,
-			// });
-
-			// return fakeAdData;
+			return runSafe(adFetcher);
 		}),
 });
+
+const runSafe = <A>(effect: Effect.Effect<A, TRPCError, never>) =>
+	Effect.runPromise(effect);

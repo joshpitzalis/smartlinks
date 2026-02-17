@@ -20,9 +20,11 @@ export const getPages = (query: string) =>
 			return existingPageId;
 		}
 
-		console.log("no pageid stored in cache");
+		console.log({ cleanQuery });
 		// if no cached pagename then search for pages
 		const pageResults = yield* searchAPI.searchPages(cleanQuery.toLowerCase());
+
+		console.log({ pageResults });
 		if (pageResults.length === 0) {
 			// todo - save null values but then attach a lastUpdated field so that you can recheck them every week = we dont want to miss any new pages created underpage names we have marked as null
 			return yield* new NoResultsError();
@@ -51,12 +53,14 @@ export const getPages = (query: string) =>
 // type = AdvertiserResultSchema
 export const getAdvertiser = (pageId?: string) =>
 	Effect.gen(function* () {
+		console.log({ pageId, location: "getAdvertiser route" });
 		const searchAPI = yield* SearchAPIService;
 		const R2 = yield* R2Storage;
 		const D1 = yield* D1Database;
 
 		// if no pageId then return all advertisers to populate the dashboard
 		if (!pageId?.trim()) {
+			console.log("no page id");
 			const allAdvertisers = yield* D1.getAdvertiserData();
 			return {
 				advertiserData: allAdvertisers,
@@ -64,23 +68,29 @@ export const getAdvertiser = (pageId?: string) =>
 			};
 		}
 
+		console.log("there is a page id");
 		// check DB first
 		const adsLessThan30DaysOld = yield* R2.getAds(pageId);
 		const advertiserData = yield* D1.getAdvertiserData(pageId);
-
+		// at this point D1.getAdvertiserData(pageId) throws a NoResultsError. I don't want it to stop excecution. I
+		console.log({ advertiserData });
 		// if exists and is less than 30 days old then early return them
-		if (adsLessThan30DaysOld.length > 0)
+		if (adsLessThan30DaysOld.length > 0) {
+			console.log("adsLessThan30DaysOld");
 			return {
 				advertiserData,
 				ads: adsLessThan30DaysOld,
 			};
-
+		}
+		console.log("fetching fresh data...");
 		// if not fetch fresh data
 		const freshAds = yield* searchAPI.getAds(pageId);
 
 		// then save Data to DB
+
 		// todo - these should happen at the same time.
 		const freshAdvertiserData = extactAdvertiserData(freshAds);
+		console.log({ freshAdvertiserData, freshAds });
 		yield* D1.saveAdvertiserData(freshAdvertiserData);
 		yield* R2.saveAds(freshAds);
 

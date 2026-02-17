@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useReducer, useRef } from "react";
+import { useCallback, useReducer } from "react";
 
 // ── Types ──────────────────────────────────────────────
 
@@ -61,12 +61,12 @@ type ContextOf<T extends Statechart> = T extends { context: infer C }
 	? C
 	: Record<string, unknown>;
 
-type ActionMap<T extends Statechart> = Partial<
+export type ActionMap<T extends Statechart> = Partial<
 	Record<
 		ActionNamesOf<T>,
 		(
 			ctx: ContextOf<T>,
-			event?: { type: EventOf<T>; [key: string]: unknown },
+			event: { type: EventOf<T>; [key: string]: any },
 		) => ContextOf<T> | void
 	>
 >;
@@ -121,13 +121,32 @@ export function useMachina<T extends Statechart>(
 		}
 
 		let nextContext = { ...state.context };
+		const eventPayload = event as { type: E; [key: string]: unknown };
+
+		// onExit current state
+		if (stateNode?.onExit) {
+			const fn = actionMap[stateNode.onExit as ActionNamesOf<T>];
+			if (fn) {
+				const result = fn(nextContext, eventPayload);
+				if (result) nextContext = result;
+			}
+		}
+
+		// transition action
 		if (typeof target === "object" && target.action) {
 			const fn = actionMap[target.action as ActionNamesOf<T>];
 			if (fn) {
-				const result = fn(
-					nextContext,
-					event as { type: E; [key: string]: unknown },
-				);
+				const result = fn(nextContext, eventPayload);
+				if (result) nextContext = result;
+			}
+		}
+
+		// onEntry next state
+		const nextStateNode = statechart.states[nextStateName];
+		if (nextStateNode?.onEntry) {
+			const fn = actionMap[nextStateNode.onEntry as ActionNamesOf<T>];
+			if (fn) {
+				const result = fn(nextContext, eventPayload);
 				if (result) nextContext = result;
 			}
 		}
@@ -140,34 +159,6 @@ export function useMachina<T extends Statechart>(
 	}
 
 	const [state, dispatch] = useReducer(reducer, initialState);
-	const prevRef = useRef<S | null>(null);
-
-	useEffect(() => {
-		if (prevRef.current !== state.currentState) {
-			if (prevRef.current) {
-				const prev = statechart.states[prevRef.current];
-				if (prev?.onExit) {
-					const fn = actionMap[prev.onExit as ActionNamesOf<T>];
-					if (fn) fn(state.context);
-				}
-			}
-			const curr = statechart.states[state.currentState];
-			if (curr?.onEntry) {
-				const fn = actionMap[curr.onEntry as ActionNamesOf<T>];
-				if (fn) fn(state.context);
-			}
-			prevRef.current = state.currentState;
-		}
-	}, [state.currentState]);
-
-	useEffect(() => {
-		const init = statechart.states[statechart.initial];
-		if (init?.onEntry) {
-			const fn = actionMap[init.onEntry as ActionNamesOf<T>];
-			if (fn) fn(state.context);
-		}
-		prevRef.current = statechart.initial as S;
-	}, []);
 
 	const send = useCallback((event: MachineEvent<T>) => dispatch(event), []);
 	const matches = useCallback(

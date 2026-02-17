@@ -6,7 +6,7 @@ import { Context, Effect } from "effect";
 import {
 	D1ReadError,
 	D1WriteError,
-	NoResultsError,
+	type NoResultsError,
 } from "../features/metaAds/errors";
 
 import type { AdvertiserData } from "../features/metaAds/utils";
@@ -57,7 +57,7 @@ export const stagingDBAPI = {
 					catch: (error) => new D1ReadError({ cause: error }),
 				});
 
-				if (!results) return yield* new NoResultsError();
+				// if (!results) return yield* new NoResultsError();
 				return results;
 			}
 
@@ -66,7 +66,7 @@ export const stagingDBAPI = {
 				catch: (error) => new D1ReadError({ cause: error }),
 			});
 
-			if (!results) return yield* new NoResultsError();
+			// if (!results) return yield* new NoResultsError();
 			return results;
 		}),
 	saveAdvertiserData: (advertiserData: AdvertiserData) =>

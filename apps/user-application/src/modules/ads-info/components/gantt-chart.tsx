@@ -31,19 +31,25 @@ import {
 	GlimpseTrigger,
 } from "@/components/kibo-ui/glimpse";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+// import { convertPageData } from "@/lib/utils";
 import { trpc } from "@/router";
-import { convertPageData } from "../../../routes/app/_authed/advertisers";
 
 export const Gantt = ({ page_id }: { page_id: string }) => {
 	const query = useQuery(
 		trpc.advertisers.getAllAdvertisers.queryOptions({ page_id }),
 	);
+
 	if (query.isLoading) {
 		return <div>Loading...</div>;
 	}
 	if (query.isError) {
+		if (query.failureReason?.shape?.message === "No results found") {
+			return <div>No results found.</div>;
+		}
 		return <div>Error!</div>;
 	}
+
+	console.log({ data: query.data });
 
 	const features = query.data?.ads?.map((f) => ({
 		...(f as Mutable<typeof f>),

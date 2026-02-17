@@ -9,12 +9,6 @@ export function CardImage({
 	profile: FacebookPageResults;
 	setPageId: Dispatch<SetStateAction<string>>;
 }) {
-	// {
-	//   id: 3,
-	//   name: 'Reform',
-	//   imageUrl: 'https://tailwindcss.com/plus-assets/img/logos/48x48/reform.svg',
-	//   lastInvoice: { date: 'January 23, 2023', dateTime: '2023-01-23', amount: '$7,600.00', status: 'Paid' },
-	// }
 	const {
 		page_id,
 		category,
@@ -27,26 +21,31 @@ export function CardImage({
 		ig_followers,
 		page_alias,
 	} = profile;
-	console.log({ ig_username });
+
 	return (
-		<li className="overflow-hidden rounded-xl outline outline-1 outline-gray-200 w-sm mb-4">
+		<li className="overflow-hidden rounded-xl outline outline-1 outline-gray-200 dark:outline-gray-700 w-sm mb-4">
 			<button
 				type="button"
-				className="flex items-center gap-x-4 border-b border-gray-900/5 bg-gray-50 p-6 cursor-pointer w-full text-left"
+				className="flex items-center gap-x-4 border-b border-gray-900/5 dark:border-gray-100/5 bg-gray-50 dark:bg-gray-800 p-6 cursor-pointer w-full text-left"
 				onClick={() => setPageId(page_id)}
 			>
 				<img
 					alt={name}
 					src={image_uri}
-					className="size-12 flex-none rounded-lg bg-white object-cover ring-1 ring-gray-900/10"
+					className="size-12 flex-none rounded-lg bg-white dark:bg-gray-900 object-cover ring-1 ring-gray-900/10 dark:ring-gray-100/10"
 				/>
 				<div className="flex flex-col">
-					<div className="text-sm font-medium text-gray-900">
+					<div className="text-sm font-medium text-gray-900 dark:text-gray-100">
 						{`fb.com/${page_alias}` || `@${ig_username}`}
 					</div>
-					<div className="text-sm font-medium text-gray-400 ">{category}</div>
+					<div className="text-sm font-medium text-gray-400 dark:text-gray-500">
+						{category}
+					</div>
 				</div>
-				<ArrowLongRightIcon aria-hidden="true" className="size-5 ml-auto" />
+				<ArrowLongRightIcon
+					aria-hidden="true"
+					className="size-5 ml-auto text-gray-900 dark:text-gray-100"
+				/>
 				{/*<Menu as="div" className="relative ml-auto">
 							<MenuButton className="relative block text-gray-400 hover:text-gray-500">
 								<span className="absolute -inset-2.5" />
@@ -78,8 +77,8 @@ export function CardImage({
 							</MenuItems>
 						</Menu>*/}
 			</button>
-			<dl className="-my-3 divide-y divide-gray-100 px-6 py-4 text-sm/6">
-				{likes && (
+			<dl className="-my-3 divide-y divide-gray-100 dark:divide-gray-700 px-6 py-4 text-sm/6">
+				{!!likes && (
 					<Row
 						name="Facebook likes"
 						value={formatLikes(likes)}
@@ -87,7 +86,7 @@ export function CardImage({
 						label="Verified"
 					/>
 				)}
-				{ig_username && (
+				{!!ig_username && (
 					<Row
 						name={`@${ig_username}`}
 						value={`${formatLikes(ig_followers ?? 0)} followers`}
@@ -113,11 +112,13 @@ const Row = ({
 }) => {
 	return (
 		<div className="flex justify-between gap-x-4 py-3">
-			<dt className="text-gray-900">{name}</dt>
+			<dt className="text-gray-900 dark:text-gray-100">{name}</dt>
 			<dd className="flex items-start gap-x-2">
-				<div className="font-medium text-gray-900">{value}</div>
+				<div className="font-medium text-gray-900 dark:text-gray-100">
+					{value}
+				</div>
 				{badge ? (
-					<div className="rounded-md bg-green-50 px-2 py-1 text-xs font-medium text-green-600 ring-1 ring-inset ring-green-500/10">
+					<div className="rounded-md bg-green-50 dark:bg-green-900/30 px-2 py-1 text-xs font-medium text-green-600 dark:text-green-400 ring-1 ring-inset ring-green-500/10">
 						{label}
 					</div>
 				) : null}
