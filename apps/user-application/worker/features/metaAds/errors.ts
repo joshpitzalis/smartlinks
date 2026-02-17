@@ -9,7 +9,7 @@ export class ParseError extends Data.TaggedError("ParseError")<{
 }> {}
 
 export class NoResultsError extends Data.TaggedError("NoResultsError")<{}> {}
-
+export class NoInputError extends Data.TaggedError("NoInputError")<{}> {}
 export class R2SaveError extends Data.TaggedError("R2SaveError")<{
 	cause: unknown;
 	id: "ADVERTISER_STORAGE";
@@ -39,4 +39,12 @@ export class KVFetchError extends Data.TaggedError("KVFetchError")<{
 export class KVSaveError extends Data.TaggedError("KVSaveError")<{
 	cause: unknown;
 	id: "QUERY-CACHE";
+}> {}
+
+export class D1WriteError extends Data.TaggedError("D1WriteError")<{
+	cause: unknown;
+}> {}
+
+export class D1ReadError extends Data.TaggedError("D1ReadError")<{
+	cause: unknown;
 }> {}

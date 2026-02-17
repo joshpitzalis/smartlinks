@@ -5,11 +5,13 @@ import { z } from "zod";
 import { getAdvertiser, getPages } from "@/worker/features/metaAds/effects";
 import { KVStore, stagingKVAPI } from "@/worker/services/KVStore";
 import { t } from "@/worker/trpc/trpc-instance";
+import { D1Database, stagingDBAPI } from "../../services/D1Database";
 import { R2Storage, stagingR2API } from "../../services/R2Storage";
 import {
 	liveSearchAPI,
-	SearchAPIService,
 	// testSearchAPI,
+	// metaSearchAPI,
+	SearchAPIService,
 } from "../../services/SearchAPIService";
 
 // Key tRPC error codes:
@@ -26,7 +28,11 @@ export const advertiserTrpcRoutes = t.router({
 		.input(z.object({ query: z.string() }))
 		.query(async ({ input, ctx }) => {
 			const pageResults = getPages(input.query).pipe(
-				Effect.provideService(SearchAPIService, liveSearchAPI),
+				Effect.provideService(
+					SearchAPIService,
+					liveSearchAPI,
+					// metaSearchAPI,
+				),
 				Effect.provideService(KVStore, stagingKVAPI(ctx.env)),
 				Effect.catchTags({
 					SearchAPIError: (error) =>
@@ -34,6 +40,22 @@ export const advertiserTrpcRoutes = t.router({
 							new TRPCError({
 								code: "BAD_GATEWAY",
 								message: "Search API request failed",
+								cause: error.cause,
+							}),
+						),
+					KVFetchError: (error) =>
+						Effect.fail(
+							new TRPCError({
+								code: "INTERNAL_SERVER_ERROR",
+								message: "KV fetch error",
+								cause: error.cause,
+							}),
+						),
+					KVSaveError: (error) =>
+						Effect.fail(
+							new TRPCError({
+								code: "INTERNAL_SERVER_ERROR",
+								message: "KV Save error",
 								cause: error.cause,
 							}),
 						),
@@ -65,15 +87,16 @@ export const advertiserTrpcRoutes = t.router({
 						),
 				}),
 			);
-			return Effect.runPromise(pageResults);
+			return runSafe(pageResults);
 		}),
 
 	getAllAdvertisers: t.procedure
-		.input(z.object({ page_id: z.string() }))
+		.input(z.object({ page_id: z.string().optional() }))
 		.query(async ({ input, ctx }) => {
 			const adFetcher = getAdvertiser(input.page_id).pipe(
 				Effect.provideService(SearchAPIService, liveSearchAPI),
 				Effect.provideService(R2Storage, stagingR2API(ctx.env)),
+				Effect.provideService(D1Database, stagingDBAPI),
 				Effect.catchTags({
 					GetAdvertisersFetchError: (error) =>
 						Effect.fail(
@@ -95,10 +118,38 @@ export const advertiserTrpcRoutes = t.router({
 						Effect.fail(
 							new TRPCError({
 								code: "INTERNAL_SERVER_ERROR",
-								message: "Failed to read from storage",
+								message: "Failed to read from R2 storage",
 								cause: error.cause,
 							}),
 						),
+
+					R2SaveError: (error) =>
+						Effect.fail(
+							new TRPCError({
+								code: "INTERNAL_SERVER_ERROR",
+								message: "Failed to save to R2 storage",
+								cause: error.cause,
+							}),
+						),
+
+					D1ReadError: (error) =>
+						Effect.fail(
+							new TRPCError({
+								code: "INTERNAL_SERVER_ERROR",
+								message: "Failed to read from D1 storage",
+								cause: error.cause,
+							}),
+						),
+
+					D1WriteError: (error) =>
+						Effect.fail(
+							new TRPCError({
+								code: "INTERNAL_SERVER_ERROR",
+								message: "Failed to write to D1 storage",
+								cause: error.cause,
+							}),
+						),
+
 					R2ParseError: (error) =>
 						Effect.fail(
 							new TRPCError({
@@ -107,26 +158,30 @@ export const advertiserTrpcRoutes = t.router({
 								cause: error.cause,
 							}),
 						),
-					R2SaveError: (error) =>
+
+					NoResultsError: (error) =>
 						Effect.fail(
 							new TRPCError({
-								code: "INTERNAL_SERVER_ERROR",
-								message: "Failed to save to storage",
+								code: "NOT_FOUND",
+								message: "No results found",
+								cause: error.cause,
+							}),
+						),
+
+					NoInputError: (error) =>
+						Effect.fail(
+							new TRPCError({
+								code: "BAD_REQUEST",
+								message: "No input provided",
 								cause: error.cause,
 							}),
 						),
 				}),
 			);
 
-			return Effect.runPromise(adFetcher);
-
-			// const { page_id } = input;
-
-			// return getAdvertisers({
-			// 	page_id: page_id,
-			// 	api_key: process.env.SEARCH_API_KEY,
-			// });
-
-			// return fakeAdData;
+			return runSafe(adFetcher);
 		}),
 });
+
+const runSafe = <A>(effect: Effect.Effect<A, TRPCError, never>) =>
+	Effect.runPromise(effect);

@@ -62,7 +62,7 @@ const CardSchema = z
 
 const SnapshotSchema = z
 	.object({
-		page_id: z.string().optional(),
+		page_id: z.string(),
 		page_profile_uri: z.string().optional(),
 		page_name: z.string().optional(),
 		page_profile_picture_url: z.string().optional(),
@@ -86,7 +86,7 @@ const AdSchema = z
 		ad_archive_id: z.string(),
 		collation_count: z.number().optional(),
 		collation_id: z.string().optional(),
-		page_id: z.string().optional(),
+		page_id: z.string(),
 		snapshot: SnapshotSchema.optional(),
 		is_active: z.boolean().optional(),
 		page_name: z.string().optional(),

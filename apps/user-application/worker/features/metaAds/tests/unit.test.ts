@@ -1,20 +1,8 @@
-// import {
-// 	QueryClient,
-// 	// QueryClientProvider
-// } from "@tanstack/react-query";
-// import { render, screen, waitFor } from "@testing-library/react";
 import { Effect } from "effect";
-import {
-	// beforeEach,
-	describe,
-	expect,
-	it,
-	test,
-	// vi
-} from "vitest";
+import { describe, expect, it, test, vi } from "vitest";
 import { getAdvertiser, getPages } from "@/worker/features/metaAds/effects";
 import { NoResultsError } from "@/worker/features/metaAds/errors";
-
+import { D1Database, testD1API } from "@/worker/services/D1Database";
 import { KVStore, testKVAPI } from "@/worker/services/KVStore";
 import { R2Storage, testR2API } from "@/worker/services/R2Storage";
 import {
@@ -52,10 +40,62 @@ describe("how page searches work", () => {
 			getAdvertiser("page_id").pipe(
 				Effect.provideService(SearchAPIService, testSearchAPI),
 				Effect.provideService(R2Storage, testR2API()),
+				Effect.provideService(D1Database, testD1API),
 			),
 		);
-		expect(adverstiserData).toEqual(fakeAdData.ads);
+		expect(adverstiserData.ads).toEqual(fakeAdData.ads);
 	});
+
+	it("store advertiser data in D1 storage when a query is made", async () => {
+		const saveAdvertiserSpy = vi.fn(testD1API.saveAdvertiserData);
+		const spiedD1API = { ...testD1API, saveAdvertiserData: saveAdvertiserSpy };
+
+		await Effect.runPromise(
+			getAdvertiser("page_id").pipe(
+				Effect.provideService(SearchAPIService, testSearchAPI),
+				Effect.provideService(R2Storage, {
+					...testR2API(),
+					getAds: (_pageId: string) => Effect.succeed([]),
+				}),
+				Effect.provideService(D1Database, spiedD1API),
+			),
+		);
+
+		const mockAdvertiser = {
+			categories: ["UNKNOWN"],
+			isAaaEligible: true,
+			pageCategories: ["Business"],
+			pageId: "111454522278222",
+			pageLikeCount: 134781,
+			pageName: "Bitly",
+			pageProfilePictureUrl:
+				"https://scontent-atl3-1.xx.fbcdn.net/v/t39.35426-6/497738888_1200326937859589_1955242157429792582_n.jpg?stp=dst-jpg_s60x60_tt6&_nc_cat=106&ccb=1-7&_nc_sid=c53f8f&_nc_ohc=xrOBWIOIou4Q7kNvwFmIP25&_nc_oc=AdktpQc6vSbGL8Qe2Ku9AUfJbaPQ5KeNN2UebWpXNYqWeMFucoIe9J2TIbgrfu0iEdrWWWy6Kugm5UaW8LvMPLjD&_nc_zt=14&_nc_ht=scontent-atl3-1.xx&_nc_gid=5k1fYlAtg2I98xfihq-9MA&oh=00_Afua5L6zQ45hKk2S72WkHJudHm6yFAsg9eH4cPpEFdcgxA&oe=698D06B4",
+			pageProfileUri: "https://www.facebook.com/bitly/",
+		};
+		expect(saveAdvertiserSpy).toHaveBeenCalledWith(mockAdvertiser);
+	});
+	it("fetches recent results from D1 storage on page load", async () => {
+		const getAdvertiserDataSpy = vi.fn(testD1API.getAdvertiserData);
+		const spiedD1API = {
+			...testD1API,
+			getAdvertiserData: getAdvertiserDataSpy,
+		};
+
+		await Effect.runPromise(
+			getAdvertiser(" ").pipe(
+				Effect.provideService(SearchAPIService, testSearchAPI),
+				Effect.provideService(R2Storage, {
+					...testR2API(),
+					getAds: (_pageId: string) => Effect.succeed([]),
+				}),
+				Effect.provideService(D1Database, spiedD1API),
+			),
+		);
+
+		expect(getAdvertiserDataSpy).toHaveBeenCalled();
+	});
+
+	it("shows a no-ads component if no ads exist for an advertiser", async () => {});
 });
 
 describe("how query validation works", () => {

@@ -1,4 +1,7 @@
+import { desc, eq } from "drizzle-orm";
 import { z } from "zod";
+import { getDb } from "@/db/database";
+import { advertisers } from "@/drizzle-out/schema";
 import { MetaAdLibraryResponseSchema } from "@/zod/advertisers";
 
 export async function getAdvertisers({
@@ -31,7 +34,6 @@ export async function getAdvertisers({
 
 	const url = `${metaAdLibraryAPI}?${params.toString()}`;
 	try {
-		console.log("Connecting to:", url);
 		const response = await fetch(url, {
 			headers: {
 				"User-Agent": "Mozilla/5.0 (compatible; SmartLinks/1.0)",
@@ -104,3 +106,64 @@ export const MetaAdLibrarySearchSchema = z.object({
 export type MetaAdLibrarySearchParams = z.infer<
 	typeof MetaAdLibrarySearchSchema
 >;
+
+export async function addAdvertiser(data: {
+	pageId: string;
+	pageName: string | undefined;
+	categories: readonly string[] | undefined;
+	isAaaEligible: boolean | undefined;
+	pageProfileUri: string | undefined;
+	pageProfilePictureUrl: string | undefined;
+	pageCategories: readonly string[] | undefined;
+	pageLikeCount: number | undefined;
+}) {
+	const db = getDb();
+
+	const {
+		pageId,
+		pageName,
+		categories,
+		isAaaEligible,
+		pageProfileUri,
+		pageProfilePictureUrl,
+		pageLikeCount,
+	} = data;
+
+	await db.insert(advertisers).values({
+		pageId,
+		pageName,
+		categories: JSON.stringify(categories),
+		isAaaEligible: isAaaEligible ? 1 : 0,
+		pageProfileUri,
+		pageProfilePictureUrl,
+		pageLikeCount,
+	});
+}
+
+export async function getAdvertiserData(pageId?: string) {
+	const db = getDb();
+
+	if (pageId?.trim()) {
+		const result = await db
+			.select()
+			.from(advertisers)
+			.where(eq(advertisers.pageId, pageId))
+			.limit(1);
+
+		if (!result.length) {
+			return null;
+		}
+		return result;
+	}
+
+	const result = await db
+		.select()
+		.from(advertisers)
+		.orderBy(desc(advertisers.updatedAt))
+		.limit(25);
+
+	if (!result.length) {
+		return null;
+	}
+	return result;
+}

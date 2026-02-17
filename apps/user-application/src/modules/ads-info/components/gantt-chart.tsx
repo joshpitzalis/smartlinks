@@ -1,6 +1,13 @@
 import { useQuery } from "@tanstack/react-query";
 
-type Mutable<T> = { -readonly [K in keyof T]: T[K] extends ReadonlyArray<infer U> ? U[] : T[K] extends object ? Mutable<T[K]> : T[K] };
+type Mutable<T> = {
+	-readonly [K in keyof T]: T[K] extends ReadonlyArray<infer U>
+		? U[]
+		: T[K] extends object
+			? Mutable<T[K]>
+			: T[K];
+};
+
 // import { glimpse } from "@/components/kibo-ui/glimpse/server";
 import groupBy from "lodash.groupby";
 import {
@@ -24,20 +31,27 @@ import {
 	GlimpseTrigger,
 } from "@/components/kibo-ui/glimpse";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+// import { convertPageData } from "@/lib/utils";
 import { trpc } from "@/router";
 
 export const Gantt = ({ page_id }: { page_id: string }) => {
 	const query = useQuery(
 		trpc.advertisers.getAllAdvertisers.queryOptions({ page_id }),
 	);
+
 	if (query.isLoading) {
 		return <div>Loading...</div>;
 	}
 	if (query.isError) {
+		if (query.failureReason?.shape?.message === "No results found") {
+			return <div>No results found.</div>;
+		}
 		return <div>Error!</div>;
 	}
 
-	const features = (query.data ?? []).map((f) => ({
+	console.log({ data: query.data });
+
+	const features = query.data?.ads?.map((f) => ({
 		...(f as Mutable<typeof f>),
 		id: f.ad_archive_id,
 		name: f.page_name ?? "",
@@ -70,7 +84,8 @@ export const Gantt = ({ page_id }: { page_id: string }) => {
 	//
 	const groupedFeatures = groupBy(features, (f) => {
 		const isActive = "is_active" in f && f.is_active === true;
-		const format = f.snapshot?.display_format === "VIDEO" ? "video" : "carousel";
+		const format =
+			f.snapshot?.display_format === "VIDEO" ? "video" : "carousel";
 		return `${isActive ? "active" : "inactive"}-${format}`;
 	});
 
@@ -157,7 +172,13 @@ export const Gantt = ({ page_id }: { page_id: string }) => {
 	);
 };
 
-const getBestImage = (feature: { snapshot?: { videos?: readonly { video_preview_image_url?: string }[]; cards?: readonly { resized_image_url?: string }[]; page_profile_picture_url?: string } }) => {
+const getBestImage = (feature: {
+	snapshot?: {
+		videos?: readonly { video_preview_image_url?: string }[];
+		cards?: readonly { resized_image_url?: string }[];
+		page_profile_picture_url?: string;
+	};
+}) => {
 	if (feature.snapshot?.videos?.[0]?.video_preview_image_url) {
 		return feature.snapshot.videos[0].video_preview_image_url;
 	} else if (feature.snapshot?.cards?.[0]?.resized_image_url) {

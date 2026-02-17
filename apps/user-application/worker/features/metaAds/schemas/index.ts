@@ -111,7 +111,7 @@ const CardSchema = Schema.Struct({
 });
 
 const SnapshotSchema = Schema.Struct({
-	page_id: Schema.optionalWith(Schema.String, { exact: true }),
+	page_id: Schema.String,
 	page_profile_uri: Schema.optionalWith(Schema.String, { exact: true }),
 	page_name: Schema.optionalWith(Schema.String, { exact: true }),
 	page_profile_picture_url: Schema.optionalWith(Schema.String, { exact: true }),
@@ -140,7 +140,7 @@ export const AdSchema = Schema.Struct({
 	ad_archive_id: Schema.String,
 	collation_count: Schema.optionalWith(Schema.Number, { exact: true }),
 	collation_id: Schema.optionalWith(Schema.String, { exact: true }),
-	page_id: Schema.optionalWith(Schema.String, { exact: true }),
+	page_id: Schema.String,
 	snapshot: Schema.optionalWith(SnapshotSchema, { exact: true }),
 	is_active: Schema.optionalWith(Schema.Boolean, { exact: true }),
 	page_name: Schema.optionalWith(Schema.String, { exact: true }),
