@@ -23,6 +23,10 @@
 			"types": "./dist/src/zod/*.d.ts",
 			"default": "./dist/src/zod/*.js"
 		},
+		"./schema/*": {
+			"types": "./dist/src/schema/*.d.ts",
+			"default": "./dist/src/schema/*.js"
+		},
 		"./durable-objects-helpers": {
 			"types": "./dist/src/durable-objects-helpers/*.d.ts",
 			"default": "./dist/src/durable-objects-helpers/*.js"
@@ -30,6 +34,14 @@
 		"./auth": {
 			"types": "./dist/src/auth.d.ts",
 			"default": "./dist/src/auth.js"
+		},
+		"./features/*": {
+			"types": "./dist/src/features/*/effects.d.ts",
+			"default": "./dist/src/features/*/effects.js"
+		},
+		"./services/*": {
+			"types": "./dist/src/services/*.d.ts",
+			"default": "./dist/src/services/*.js"
 		}
 	},
 	"keywords": [],
@@ -40,6 +52,7 @@
 		"better-auth": "1.3.4",
 		"better-sqlite3": "^12.6.2",
 		"drizzle-orm": "^0.44.7",
+		"effect": "^3.19.15",
 		"kysely": "^0.28.10",
 		"kysely-d1": "^0.4.0",
 		"nanoid": "^5.1.6",

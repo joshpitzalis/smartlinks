@@ -51,6 +51,7 @@
 	"include": [
 		"worker-configuration.d.ts",
 		"service-bindings.d.ts",
-		"src/**/*.ts"
+		"src/**/*.ts",
+		"../../packages/data-ops/src/features/ads/tests/dummy-data copy.ts"
 	]
 }
