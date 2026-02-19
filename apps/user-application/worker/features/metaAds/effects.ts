@@ -53,14 +53,12 @@ export const getPages = (query: string) =>
 // type = AdvertiserResultSchema
 export const getAdvertiser = (pageId?: string) =>
 	Effect.gen(function* () {
-		console.log({ pageId, location: "getAdvertiser route" });
 		const searchAPI = yield* SearchAPIService;
 		const R2 = yield* R2Storage;
 		const D1 = yield* D1Database;
 
 		// if no pageId then return all advertisers to populate the dashboard
 		if (!pageId?.trim()) {
-			console.log("no page id");
 			const allAdvertisers = yield* D1.getAdvertiserData();
 			return {
 				advertiserData: allAdvertisers,
@@ -68,15 +66,13 @@ export const getAdvertiser = (pageId?: string) =>
 			};
 		}
 
-		console.log("there is a page id");
 		// check DB first
 		const adsLessThan30DaysOld = yield* R2.getAds(pageId);
 		const advertiserData = yield* D1.getAdvertiserData(pageId);
 		// at this point D1.getAdvertiserData(pageId) throws a NoResultsError. I don't want it to stop excecution. I
-		console.log({ advertiserData });
+
 		// if exists and is less than 30 days old then early return them
 		if (adsLessThan30DaysOld.length > 0) {
-			console.log("adsLessThan30DaysOld");
 			return {
 				advertiserData,
 				ads: adsLessThan30DaysOld,
@@ -87,11 +83,11 @@ export const getAdvertiser = (pageId?: string) =>
 		const freshAds = yield* searchAPI.getAds(pageId);
 
 		// then save Data to DB
-
 		// todo - these should happen at the same time.
 		const freshAdvertiserData = extactAdvertiserData(freshAds);
-		console.log({ freshAdvertiserData, freshAds });
+		console.log("saving to D1...");
 		yield* D1.saveAdvertiserData(freshAdvertiserData);
+		console.log("saving to R2...");
 		yield* R2.saveAds(freshAds);
 
 		return {

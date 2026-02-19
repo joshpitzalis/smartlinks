@@ -47,7 +47,7 @@
 			"@/bindings": ["./service-bindings.d.ts"]
 		}
 	},
-	"exclude": ["test"],
+	"exclude": ["test", "src/**/*.test.ts"],
 	"include": [
 		"worker-configuration.d.ts",
 		"service-bindings.d.ts",

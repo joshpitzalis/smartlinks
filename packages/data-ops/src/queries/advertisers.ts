@@ -129,15 +129,32 @@ export async function addAdvertiser(data: {
 		pageLikeCount,
 	} = data;
 
-	await db.insert(advertisers).values({
-		pageId,
-		pageName,
-		categories: JSON.stringify(categories),
-		isAaaEligible: isAaaEligible ? 1 : 0,
-		pageProfileUri,
-		pageProfilePictureUrl,
-		pageLikeCount,
-	});
+	await db
+		.insert(advertisers)
+		.values({
+			pageId,
+			pageName,
+			categories: JSON.stringify(categories),
+			isAaaEligible: isAaaEligible ? 1 : 0,
+			pageProfileUri,
+			pageProfilePictureUrl,
+			pageLikeCount,
+		})
+		.onConflictDoUpdate({
+			target: advertisers.pageId,
+			set: {
+				...(pageName ? { pageName } : {}),
+				...(categories?.length
+					? { categories: JSON.stringify(categories) }
+					: {}),
+				...(isAaaEligible !== undefined
+					? { isAaaEligible: isAaaEligible ? 1 : 0 }
+					: {}),
+				...(pageProfileUri ? { pageProfileUri } : {}),
+				...(pageProfilePictureUrl ? { pageProfilePictureUrl } : {}),
+				...(pageLikeCount !== undefined ? { pageLikeCount } : {}),
+			},
+		});
 }
 
 export async function getAdvertiserData(pageId?: string) {

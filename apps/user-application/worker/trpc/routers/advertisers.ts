@@ -36,7 +36,7 @@ export const advertiserTrpcRoutes = t.router({
 				Effect.provideService(KVStore, stagingKVAPI(ctx.env)),
 				Effect.catchTags({
 					SearchAPIError: (error) =>
-						Effect.fail(
+						Effect.die(
 							new TRPCError({
 								code: "BAD_GATEWAY",
 								message: "Search API request failed",
@@ -44,7 +44,7 @@ export const advertiserTrpcRoutes = t.router({
 							}),
 						),
 					KVFetchError: (error) =>
-						Effect.fail(
+						Effect.die(
 							new TRPCError({
 								code: "INTERNAL_SERVER_ERROR",
 								message: "KV fetch error",
@@ -52,7 +52,7 @@ export const advertiserTrpcRoutes = t.router({
 							}),
 						),
 					KVSaveError: (error) =>
-						Effect.fail(
+						Effect.die(
 							new TRPCError({
 								code: "INTERNAL_SERVER_ERROR",
 								message: "KV Save error",
@@ -61,7 +61,7 @@ export const advertiserTrpcRoutes = t.router({
 						),
 
 					ConfigError: (error) =>
-						Effect.fail(
+						Effect.die(
 							new TRPCError({
 								code: "INTERNAL_SERVER_ERROR",
 								message: "Server configuration error",
@@ -70,7 +70,7 @@ export const advertiserTrpcRoutes = t.router({
 						),
 
 					ParseError: (error) =>
-						Effect.fail(
+						Effect.die(
 							new TRPCError({
 								code: "UNPROCESSABLE_CONTENT",
 								message: "Schema validation failed",
@@ -79,7 +79,7 @@ export const advertiserTrpcRoutes = t.router({
 						),
 
 					NoResultsError: () =>
-						Effect.fail(
+						Effect.die(
 							new TRPCError({
 								code: "NOT_FOUND",
 								message: "No results found for the given query",
@@ -99,7 +99,7 @@ export const advertiserTrpcRoutes = t.router({
 				Effect.provideService(D1Database, stagingDBAPI),
 				Effect.catchTags({
 					GetAdvertisersFetchError: (error) =>
-						Effect.fail(
+						Effect.die(
 							new TRPCError({
 								code: "BAD_GATEWAY",
 								message: "Failed to fetch ads",
@@ -107,7 +107,7 @@ export const advertiserTrpcRoutes = t.router({
 							}),
 						),
 					ConfigError: (error) =>
-						Effect.fail(
+						Effect.die(
 							new TRPCError({
 								code: "INTERNAL_SERVER_ERROR",
 								message: "Server configuration error",
@@ -115,7 +115,7 @@ export const advertiserTrpcRoutes = t.router({
 							}),
 						),
 					R2FetchError: (error) =>
-						Effect.fail(
+						Effect.die(
 							new TRPCError({
 								code: "INTERNAL_SERVER_ERROR",
 								message: "Failed to read from R2 storage",
@@ -124,7 +124,7 @@ export const advertiserTrpcRoutes = t.router({
 						),
 
 					R2SaveError: (error) =>
-						Effect.fail(
+						Effect.die(
 							new TRPCError({
 								code: "INTERNAL_SERVER_ERROR",
 								message: "Failed to save to R2 storage",
@@ -133,7 +133,7 @@ export const advertiserTrpcRoutes = t.router({
 						),
 
 					D1ReadError: (error) =>
-						Effect.fail(
+						Effect.die(
 							new TRPCError({
 								code: "INTERNAL_SERVER_ERROR",
 								message: "Failed to read from D1 storage",
@@ -142,7 +142,7 @@ export const advertiserTrpcRoutes = t.router({
 						),
 
 					D1WriteError: (error) =>
-						Effect.fail(
+						Effect.die(
 							new TRPCError({
 								code: "INTERNAL_SERVER_ERROR",
 								message: "Failed to write to D1 storage",
@@ -151,7 +151,7 @@ export const advertiserTrpcRoutes = t.router({
 						),
 
 					R2ParseError: (error) =>
-						Effect.fail(
+						Effect.die(
 							new TRPCError({
 								code: "INTERNAL_SERVER_ERROR",
 								message: "Failed to parse stored data",
@@ -160,7 +160,7 @@ export const advertiserTrpcRoutes = t.router({
 						),
 
 					NoResultsError: (error) =>
-						Effect.fail(
+						Effect.die(
 							new TRPCError({
 								code: "NOT_FOUND",
 								message: "No results found",
@@ -169,7 +169,7 @@ export const advertiserTrpcRoutes = t.router({
 						),
 
 					NoInputError: (error) =>
-						Effect.fail(
+						Effect.die(
 							new TRPCError({
 								code: "BAD_REQUEST",
 								message: "No input provided",
@@ -183,5 +183,5 @@ export const advertiserTrpcRoutes = t.router({
 		}),
 });
 
-const runSafe = <A>(effect: Effect.Effect<A, TRPCError, never>) =>
+const runSafe = <A>(effect: Effect.Effect<A, never, never>) =>
 	Effect.runPromise(effect);

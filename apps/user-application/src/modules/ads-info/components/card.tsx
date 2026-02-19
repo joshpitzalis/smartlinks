@@ -36,7 +36,7 @@ export function CardImage({
 				/>
 				<div className="flex flex-col">
 					<div className="text-sm font-medium text-gray-900 dark:text-gray-100">
-						{`fb.com/${page_alias}` || `@${ig_username}`}
+						{name || `fb.com/${page_alias}` || `@${ig_username}`}
 					</div>
 					<div className="text-sm font-medium text-gray-400 dark:text-gray-500">
 						{category}

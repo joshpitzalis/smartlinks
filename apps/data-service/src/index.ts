@@ -6,6 +6,7 @@ import { handleLinkClick } from "./queue-handlers/links-clicks";
 
 export { EvaluationScheduler } from "@/durable-objects/evaluation-scheduler";
 export { LinkClickTracker } from "@/durable-objects/link-click-tracker";
+export { AdDataFetcher } from "@/features/ads/fetch-ad-workflow";
 export { DestinationEvaluationWorkflow } from "@/workflows/destination-evalutation-workflow";
 
 export default class DataService extends WorkerEntrypoint<Env> {
