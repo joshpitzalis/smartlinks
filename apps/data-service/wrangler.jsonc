@@ -74,6 +74,10 @@
 					{
 						"name": "EVALUATION_SCHEDULER",
 						"class_name": "EvaluationScheduler"
+					},
+					 {
+						"name": "AD_UPDATE_SCHEDULER",
+						"class_name": "AdDataUpdateScheduler"
 					}
 				]
 			},
@@ -85,7 +89,11 @@
 				{
 					"tag": "v2",
 					"new_sqlite_classes": ["LinkClickTracker"]
-				}
+				},
+				{
+					"tag": "v3",
+					"new_classes": ["AdDataUpdateScheduler"]
+				},
 			]
 		},
 		"production": {

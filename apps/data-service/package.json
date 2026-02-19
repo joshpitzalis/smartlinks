@@ -5,7 +5,7 @@
 	"scripts": {
 		"deploy:staging": "wrangler deploy --env staging",
 		"deploy:production": "wrangler deploy --env production",
-		"dev": "wrangler dev",
+		"dev": "wrangler dev --env staging",
 		"start": "wrangler dev",
 		"test": "vitest",
 		"cf-typegen:staging": "wrangler types --env-interface BaseEnv --env staging",

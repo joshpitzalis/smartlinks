@@ -10,7 +10,11 @@ export default defineWorkersConfig({
 	test: {
 		poolOptions: {
 			workers: {
-				wrangler: { configPath: "./wrangler.jsonc", environment: "staging" },
+				wrangler: {
+					configPath: "./wrangler.jsonc",
+					environment: "staging"
+				},
+				singleWorker: true,
 				isolatedStorage: false,
 			},
 		},

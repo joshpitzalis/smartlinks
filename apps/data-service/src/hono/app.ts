@@ -8,12 +8,34 @@ import {
 	getRoutingDestinations,
 } from "@/helpers/route-ops";
 import { CloudFlareContext } from "@/services";
+import type {FacebookAdvertiserPages} from '../features/ads/ad-update-scheduler'
 
 class InvalidCloudflareHeaders extends Data.TaggedError(
 	"InvalidCloudflareHeaders",
 ) {}
 
 export const App = new Hono<{ Bindings: Env }>();
+
+App.get("/do/status", async (c) => {
+	const doId = c.env.AD_UPDATE_SCHEDULER.idFromName("ad_update_scheduler");
+  const stub = c.env.AD_UPDATE_SCHEDULER.get(doId);
+	const pageIds = await stub.showStatus()
+  const  pages = [...pageIds.values()]
+  return c.json({pages})
+});
+
+App.post("/do/add", async (c ) => {
+
+	const { pageIds } = await c.req.json<{ pageIds: string[] }>();
+
+
+	const doId = c.env.AD_UPDATE_SCHEDULER.idFromName("ad_update_scheduler");
+	console.log({doId})
+  const stub = c.env.AD_UPDATE_SCHEDULER.get(doId);
+await stub.addPageIds(pageIds);
+
+return c.json({ success: true });
+});
 
 App.get("/click-socket", async (c) => {
 	const upgradeHeader = c.req.header("Upgrade");
