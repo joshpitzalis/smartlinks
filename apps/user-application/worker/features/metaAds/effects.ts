@@ -1,10 +1,11 @@
+import { extactAdvertiserData } from "@repo/data-ops/DTOs/ads";
 import { Effect } from "effect";
 import { R2Storage } from "@/worker/services/R2Storage";
 import { D1Database } from "../../services/D1Database";
 import { KVStore } from "../../services/KVStore";
 import { SearchAPIService } from "../../services/SearchAPIService";
 import { NoResultsError } from "./errors";
-import { extactAdvertiserData, santize } from "./utils";
+import { santize } from "./utils";
 
 export const getPages = (query: string) =>
 	Effect.gen(function* () {
@@ -85,10 +86,13 @@ export const getAdvertiser = (pageId?: string) =>
 		// then save Data to DB
 		// todo - these should happen at the same time.
 		const freshAdvertiserData = extactAdvertiserData(freshAds);
-		console.log("saving to D1...");
-		yield* D1.saveAdvertiserData(freshAdvertiserData);
-		console.log("saving to R2...");
-		yield* R2.saveAds(freshAds);
+
+		if (freshAdvertiserData) {
+			console.log("saving to D1...");
+			yield* D1.saveAdvertiserData(freshAdvertiserData);
+			console.log("saving to R2...");
+			yield* R2.saveAds(freshAds);
+		}
 
 		return {
 			advertiserData,

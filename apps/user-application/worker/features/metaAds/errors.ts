@@ -9,7 +9,9 @@ export class ParseError extends Data.TaggedError("ParseError")<{
 }> {}
 
 export class NoResultsError extends Data.TaggedError("NoResultsError")<{}> {}
-export class NoInputError extends Data.TaggedError("NoInputError")<{}> {}
+export class NoInputError extends Data.TaggedError("NoInputError")<{
+	cause?: unknown;
+}> {}
 export class R2SaveError extends Data.TaggedError("R2SaveError")<{
 	cause: unknown;
 	id: "ADVERTISER_STORAGE";

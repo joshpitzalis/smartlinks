@@ -1,3 +1,4 @@
+import type { AdvertiserData } from "@repo/data-ops/DTOs/ads";
 import {
 	addAdvertiser,
 	getAdvertiserData,
@@ -6,10 +7,9 @@ import { Context, Effect } from "effect";
 import {
 	D1ReadError,
 	D1WriteError,
+	NoInputError,
 	type NoResultsError,
 } from "../features/metaAds/errors";
-
-import type { AdvertiserData } from "../features/metaAds/utils";
 
 export class D1Database extends Context.Tag("D1Database")<
 	D1Database,
@@ -23,7 +23,7 @@ export class D1Database extends Context.Tag("D1Database")<
 		>;
 		saveAdvertiserData: (
 			ads: AdvertiserData,
-		) => Effect.Effect<string, D1WriteError, never>;
+		) => Effect.Effect<string, D1WriteError | NoInputError, never>;
 	}
 >() {}
 
@@ -71,6 +71,12 @@ export const stagingDBAPI = {
 		}),
 	saveAdvertiserData: (advertiserData: AdvertiserData) =>
 		Effect.gen(function* () {
+			if (!advertiserData) {
+				return yield* new NoInputError({
+					cause: new Error("Advertiser data is required"),
+				});
+			}
+
 			yield* Effect.tryPromise({
 				try: () => addAdvertiser(advertiserData),
 				catch: (error) => new D1WriteError({ cause: error }),

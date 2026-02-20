@@ -6,7 +6,8 @@
 	"include": [
 		"./**/*.ts",
 		"../worker-configuration.d.ts",
-		"../src/**/*.test.ts"
+		"../src/**/*.test.ts",
+		"../src/**/env.d.ts"
 	],
 	"exclude": []
 }

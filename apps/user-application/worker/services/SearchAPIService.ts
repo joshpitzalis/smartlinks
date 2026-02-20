@@ -72,7 +72,9 @@ export const liveSearchAPI: Context.Tag.Service<SearchAPIService> = {
 		Effect.gen(function* () {
 			const api_key = yield* Config.string("SEARCH_API_KEY");
 			if (!pageId?.trim()) {
-				return yield* new NoInputError();
+				return yield* new NoInputError({
+					cause: new Error("A pageId is required to fetch advertiser data."),
+				});
 			}
 			const result = yield* Effect.tryPromise({
 				try: () => getAdvertisers({ page_id: pageId, api_key }),

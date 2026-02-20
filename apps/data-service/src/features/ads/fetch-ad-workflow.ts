@@ -53,6 +53,7 @@ export class AdDataFetcher extends WorkflowEntrypoint<Env, InputEvent> {
 		});
 
 		await step.do("Save to D1", async () => {
+			// todo - why does this run when freshAdDatais []
 			const freshAdvertiserData = extactAdvertiserData(freshAdData);
 			if (!freshAdvertiserData) return;
 
@@ -69,6 +70,9 @@ export class AdDataFetcher extends WorkflowEntrypoint<Env, InputEvent> {
 
 			return runSafe(SaveToDB);
 		});
+
+		const pageName = freshAdData[0]?.page_name
+		return pageName
 	}
 }
 

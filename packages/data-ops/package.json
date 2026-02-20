@@ -23,9 +23,9 @@
 			"types": "./dist/src/zod/*.d.ts",
 			"default": "./dist/src/zod/*.js"
 		},
-		"./schema/*": {
-			"types": "./dist/src/schema/*.d.ts",
-			"default": "./dist/src/schema/*.js"
+		"./schemas/*": {
+			"types": "./dist/src/schemas/*.d.ts",
+			"default": "./dist/src/schemas/*.js"
 		},
 		"./durable-objects-helpers": {
 			"types": "./dist/src/durable-objects-helpers/*.d.ts",
@@ -42,6 +42,10 @@
 		"./services/*": {
 			"types": "./dist/src/services/*.d.ts",
 			"default": "./dist/src/services/*.js"
+		},
+		"./DTOs/*": {
+			"types": "./dist/src/DTOs/*.d.ts",
+			"default": "./dist/src/DTOs/*.js"
 		}
 	},
 	"keywords": [],
