@@ -1,4 +1,4 @@
-import type { AdSchemaType } from "@repo/data-ops/schema/adsSchema";
+import type { AdSchemaType } from "@repo/data-ops/schemas/adsSchema";
 
 export const extactAdvertiserData = (ads: AdSchemaType[]) => {
 	// todo - if the first item in the array doesnt have the values then you could riffle through the remaining results

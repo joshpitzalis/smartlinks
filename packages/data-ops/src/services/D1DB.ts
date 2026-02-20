@@ -1,4 +1,5 @@
 import { Context, Effect } from "effect";
+import type { InsightsType } from "@/DTOs/ads";
 import {
 	D1ReadError,
 	D1WriteError,
@@ -19,6 +20,7 @@ export class D1Database extends Context.Tag("D1Database")<
 		>;
 		saveAdvertiserData: (
 			ads: AdvertiserData,
+			insights?: InsightsType,
 		) => Effect.Effect<string, D1WriteError, never>;
 	}
 >() {}
@@ -38,10 +40,20 @@ export const testD1API = {
 				pageLikeCount: 134781,
 				createdAt: new Date().toISOString(),
 				updatedAt: new Date().toISOString(),
+				totalAds: null,
+				activeAds: null,
+				adsByFormat: null,
+				adsByCategory: null,
+				platformDistribution: null,
+				advertisingSince: null,
+				averageAdLifespanDays: null,
+				longestRunningAd: null,
 			},
 		]),
-	saveAdvertiserData: (_advertiserData: AdvertiserData) =>
-		Effect.succeed("111454522278222"),
+	saveAdvertiserData: (
+		_advertiserData: AdvertiserData,
+		_insights?: InsightsType,
+	) => Effect.succeed("111454522278222"),
 };
 
 export const stagingDBAPI = {
@@ -65,10 +77,13 @@ export const stagingDBAPI = {
 			// if (!results) return yield* new NoResultsError();
 			return results;
 		}),
-	saveAdvertiserData: (advertiserData: AdvertiserData) =>
+	saveAdvertiserData: (
+		advertiserData: AdvertiserData,
+		insights?: InsightsType,
+	) =>
 		Effect.gen(function* () {
 			yield* Effect.tryPromise({
-				try: () => addAdvertiser(advertiserData),
+				try: () => addAdvertiser(advertiserData, insights),
 				catch: (error) => new D1WriteError({ cause: error }),
 			});
 

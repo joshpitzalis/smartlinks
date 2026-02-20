@@ -18,7 +18,7 @@ import { fakeAdData } from "./dummy-data";
 
 beforeAll(async () => {
 	await env.DB.exec(
-		`CREATE TABLE IF NOT EXISTS "advertisers" ("page_id" text PRIMARY KEY NOT NULL, "page_name" text, "categories" text, "is_aaa_eligible" integer, "page_profile_uri" text, "page_profile_picture_url" text, "page_categories" text, "page_like_count" integer, "created_at" text DEFAULT (datetime('now')), "updated_at" text DEFAULT (datetime('now')))`,
+		`CREATE TABLE IF NOT EXISTS "advertisers" ("page_id" text PRIMARY KEY NOT NULL, "page_name" text, "categories" text, "is_aaa_eligible" integer, "page_profile_uri" text, "page_profile_picture_url" text, "page_categories" text, "page_like_count" integer, "created_at" text DEFAULT (datetime('now')), "updated_at" text DEFAULT (datetime('now')), "total_ads" integer, "active_ads" integer, "ads_by_format" text, "ads_by_category" text, "platform_distribution" text, "advertising_since" text, "average_ad_lifespan_days" real, "longest_running_ad" text)`,
 	);
 	initDatabase(env.DB);
 });
@@ -71,6 +71,7 @@ describe("D1Database contract", () => {
 		describe(name, () => {
 			it("saveAdvertiserData returns the pageId on success", async () => {
 				const advertiserData = extactAdvertiserData(fakeAdData.ads);
+				if (!advertiserData) throw new Error("No advertiser data");
 				const result = await Effect.runPromise(
 					impl
 						.saveAdvertiserData(advertiserData)
@@ -93,8 +94,9 @@ describe("D1Database contract", () => {
 				const result = await Effect.runPromise(
 					impl.getAdvertiserData("111454522278222"),
 				);
+				expect(result).not.toBeNull();
 				expect(Array.isArray(result)).toBe(true);
-				expect(result.length).toBeGreaterThan(0);
+				expect(result!.length).toBeGreaterThan(0);
 			});
 		});
 	});

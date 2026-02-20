@@ -4,6 +4,7 @@ import {
 	type WorkflowStep,
 } from "cloudflare:workers";
 import { NonRetryableError } from "cloudflare:workflows";
+import { deriveInsights } from "@repo/data-ops/DTOs/ads";
 import { initDatabase } from "@repo/data-ops/database";
 import {
 	liveSearchAPI,
@@ -53,13 +54,15 @@ export class AdDataFetcher extends WorkflowEntrypoint<Env, InputEvent> {
 		});
 
 		await step.do("Save to D1", async () => {
-			// todo - why does this run when freshAdDatais []
+			// todo - why happens when freshAdData is []
 			const freshAdvertiserData = extactAdvertiserData(freshAdData);
+			const insights = deriveInsights(freshAdData);
+
 			if (!freshAdvertiserData) return;
 
 			const SaveToDB = Effect.gen(function* () {
 				const D1 = yield* D1Database;
-				return yield* D1.saveAdvertiserData(freshAdvertiserData);
+				return yield* D1.saveAdvertiserData(freshAdvertiserData, insights);
 			}).pipe(
 				Effect.provideService(D1Database, stagingDBAPI),
 				Effect.catchTags({
@@ -71,8 +74,8 @@ export class AdDataFetcher extends WorkflowEntrypoint<Env, InputEvent> {
 			return runSafe(SaveToDB);
 		});
 
-		const pageName = freshAdData[0]?.page_name
-		return pageName
+		const pageName = freshAdData[0]?.page_name;
+		return pageName;
 	}
 }
 

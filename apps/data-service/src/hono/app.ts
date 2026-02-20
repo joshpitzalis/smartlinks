@@ -19,7 +19,7 @@ export const App = new Hono<{ Bindings: Env }>();
 App.get("/do/status", async (c) => {
 	const doId = c.env.AD_UPDATE_SCHEDULER.idFromName("ad_update_scheduler");
   const stub = c.env.AD_UPDATE_SCHEDULER.get(doId);
-	const pageIds = await stub.showStatus()
+	const pageIds = await stub.showStatus() as unknown as Map<string, unknown>;
   const  pages = [...pageIds.values()]
   return c.json({pages})
 });

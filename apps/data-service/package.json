@@ -8,6 +8,7 @@
 		"dev": "wrangler dev --env staging",
 		"start": "wrangler dev",
 		"test": "vitest",
+		"types": "tsc --noEmit",
 		"cf-typegen:staging": "wrangler types --env-interface BaseEnv --env staging",
 		"cf-typegen:production": "wrangler types --env-interface BaseEnv --env production"
 	},

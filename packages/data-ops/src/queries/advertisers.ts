@@ -1,9 +1,9 @@
 import { desc, eq } from "drizzle-orm";
 import { z } from "zod";
+import type { InsightsType } from "@/DTOs/ads";
 import { getDb } from "@/db/database";
 import { advertisers } from "@/drizzle-out/schema";
 import { MetaAdLibraryResponseSchema } from "@/zod/advertisers";
-
 export async function getAdvertisers({
 	page_id,
 	api_key,
@@ -107,16 +107,19 @@ export type MetaAdLibrarySearchParams = z.infer<
 	typeof MetaAdLibrarySearchSchema
 >;
 
-export async function addAdvertiser(data: {
-	pageId: string;
-	pageName: string | undefined;
-	categories: readonly string[] | undefined;
-	isAaaEligible: boolean | undefined;
-	pageProfileUri: string | undefined;
-	pageProfilePictureUrl: string | undefined;
-	pageCategories: readonly string[] | undefined;
-	pageLikeCount: number | undefined;
-}) {
+export async function addAdvertiser(
+	data: {
+		pageId: string;
+		pageName: string | undefined;
+		categories: readonly string[] | undefined;
+		isAaaEligible: boolean | undefined;
+		pageProfileUri: string | undefined;
+		pageProfilePictureUrl: string | undefined;
+		pageCategories: readonly string[] | undefined;
+		pageLikeCount: number | undefined;
+	},
+	insights?: InsightsType,
+) {
 	const db = getDb();
 
 	const {
@@ -139,6 +142,17 @@ export async function addAdvertiser(data: {
 			pageProfileUri,
 			pageProfilePictureUrl,
 			pageLikeCount,
+
+			...(insights ? {
+				totalAds: insights.totalAds,
+				activeAds: insights.activeAds,
+				adsByFormat: JSON.stringify(insights.adsByFormat),
+				adsByCategory: JSON.stringify(insights.adsByCategory),
+				platformDistribution: JSON.stringify(insights.platformDistribution),
+				advertisingSince: insights.advertisingSince,
+				averageAdLifespanDays: insights.averageAdLifespanDays,
+				longestRunningAd: JSON.stringify(insights.longestRunningAd),
+			} : {}),
 		})
 		.onConflictDoUpdate({
 			target: advertisers.pageId,

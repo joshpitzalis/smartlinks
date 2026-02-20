@@ -16,8 +16,8 @@ export function getRecentClicks(
 	const cursor = sqlStorage.exec(query, offsetTime, limit);
 
 	const clicks = durableObjectGeoClickArraySchema.parse(cursor.toArray());
-	const mostRecentTime = clicks.length > 0 ? clicks[0].time : 0;
-	const oldestTime = clicks.length > 0 ? clicks[clicks.length - 1].time : 0;
+	const mostRecentTime = clicks.length > 0 ? clicks[0]!.time : 0;
+	const oldestTime = clicks.length > 0 ? clicks[clicks.length - 1]!.time : 0;
 
 	return { clicks, mostRecentTime, oldestTime };
 }

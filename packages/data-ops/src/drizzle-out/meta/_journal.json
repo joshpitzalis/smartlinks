@@ -15,6 +15,20 @@
       "when": 1770372298916,
       "tag": "0001_graceful_freak",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "6",
+      "when": 1771578495041,
+      "tag": "0002_fluffy_venus",
+      "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "6",
+      "when": 1771578500708,
+      "tag": "0003_spooky_moonstone",
+      "breakpoints": true
     }
   ]
 }
